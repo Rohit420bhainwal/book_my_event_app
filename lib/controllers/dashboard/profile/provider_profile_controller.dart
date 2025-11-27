@@ -1,0 +1,63 @@
+import 'package:bookmyevent/app/services/api_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get/get.dart';
+
+class ProviderProfileController extends GetxController {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  var displayName = "".obs;
+  var email = "".obs;
+  var phone = "".obs;
+  var city = "".obs;
+  var photoUrl = "".obs;
+
+  ApiService apiService = ApiService();
+  var isLoading = true.obs;
+
+  final String baseUrl = "http://192.168.222.85:5000/uploads/"; // change as per your server
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchUserProfile();
+  }
+
+  Future<void> fetchUserProfile() async {
+    try {
+      isLoading.value = true;
+      final response = await apiService.get("profile", withAuth: true);
+
+      if (response['success'] == true &&
+          response['data'] != null &&
+          response['data']['user'] != null) {
+        final user = response['data']['user'];
+
+        displayName.value = user['name'] ?? "";
+        email.value = user['email'] ?? "";
+        phone.value = user['phone'] ?? "";
+        city.value = user['city'] ?? "";
+
+        if (user['profileImage'] != null && user['profileImage'].isNotEmpty) {
+          photoUrl.value = user['profileImage'].startsWith("http")
+              ? user['profileImage']
+              : "$baseUrl${user['profileImage']}";
+        } else {
+          photoUrl.value = "";
+        }
+
+      } else {
+        Get.snackbar("Error", "Unable to get profile details");
+      }
+    } catch (e) {
+      print("Error loading profile details: $e");
+      Get.snackbar("Error", "Failed to load profile details: $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> logout() async {
+    await _auth.signOut();
+    Get.offAllNamed("/login");
+  }
+}

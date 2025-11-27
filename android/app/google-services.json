@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "354978036422",
+    "project_id": "bookmyevent-d0f81",
+    "storage_bucket": "bookmyevent-d0f81.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:354978036422:android:c53a1339fe0cdf608ef5c7",
+        "android_client_info": {
+          "package_name": "com.bookmyevent.app.bookmyevent"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "354978036422-k5p4eeeffcu39toh1t4vcr4sa0ljj5vg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bookmyevent.app.bookmyevent",
+            "certificate_hash": "39709600acf0de7fb123a07f94c382a0ff23d67d"
+          }
+        },
+        {
+          "client_id": "354978036422-04fld3kqb27herd79e67lpo0en8p2m0t.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCMkgPHghq3E8t8sAbYl---NLzEYgJltJY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "354978036422-04fld3kqb27herd79e67lpo0en8p2m0t.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
