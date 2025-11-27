@@ -2,6 +2,7 @@ import 'package:bookmyevent/views/customer/venues/venue_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/dashboard/home/customer_home_controller.dart';
+import '../../routes/app_routes.dart';
 
 
 class HomeScreen extends StatelessWidget {
@@ -76,10 +77,12 @@ class HomeScreen extends StatelessWidget {
                       final venue = controller.filteredFeaturedVenues[index];
                       return GestureDetector(
                         onTap: () {
-                          Get.to(() => const VenueDetailsScreen(), arguments: {
-                            "venue": venue,
-                          });
-                        },
+                          Get.toNamed(
+                            Routes.venueDetails,
+                            arguments: {"venue": venue},
+                          );
+                        }
+                        ,
                         child: Container(
                           width: 220,
                           margin: const EdgeInsets.only(right: 12, bottom: 8),
@@ -212,12 +215,12 @@ class HomeScreen extends StatelessWidget {
                         title: Text(venue["category"] ?? ""),
                         subtitle: Text(venue["address"] ?? ""),
                         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                        onTap: () {
-                          Get.to(() => const VenueDetailsScreen(), arguments: {
-                            "venueId": venue["id"],
-                            "providerId": venue["providerId"],
-                          });
-                        },
+                          onTap: () {
+                            Get.toNamed(
+                              Routes.venueDetails,
+                              arguments: {"venue": venue},
+                            );
+                          }
                       ),
                     );
                   },

@@ -5,12 +5,14 @@ import '../../../controllers/venues/venue_details_controller.dart';
 import '../../../routes/app_routes.dart';
 
 class VenueDetailsScreen extends StatelessWidget {
-  const VenueDetailsScreen({super.key});
+  final Map<String, dynamic> venue;
+  const VenueDetailsScreen({super.key,required this.venue});
 
   @override
   Widget build(BuildContext context) {
     final args = (Get.arguments ?? {}) as Map<String, dynamic>;
-    final Map<String, dynamic> venueData = args["venue"] ?? {};
+   // final Map<String, dynamic> venueData = args["venue"] ?? {};
+    final Map<String, dynamic> venueData = venue;
     final controller = Get.put(VenueDetailsController(venue: venueData));
 
     return Scaffold(

@@ -21,5 +21,6 @@ class Routes {
   static const editService = '/edit_service';
   static const String chatScreen = '/chat_screen';
   static const String selectCustomerCity = '/customer_city';
+  static const venueDetails = '/venue_details';
 
 }
