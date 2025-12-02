@@ -7,13 +7,13 @@ import '../model/product.dart';
 
 class ApiService {
 
-  static const String baseUrl = "http://192.168.222.85:5000/api";
-  String baseUrl1 = baseUrl;
-  String imageUrl = "${baseUrl.replaceAll("/api", "")}/uploads/";
-
-/*  static const String baseUrl = "https://book-my-event-api.onrender.com/api";
+/*  static const String baseUrl = "http://192.168.222.85:5000/api";
   String baseUrl1 = baseUrl;
   String imageUrl = "${baseUrl.replaceAll("/api", "")}/uploads/";*/
+
+  static const String baseUrl = "https://book-my-event-api.onrender.com/api";
+  String baseUrl1 = baseUrl;
+  String imageUrl = "${baseUrl.replaceAll("/api", "")}/uploads/";
 
 
 
