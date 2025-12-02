@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 import '../app/views/chat_screen.dart';
 import '../app/views/edit_service_screen.dart';
 import '../app/views/pending_approval_screen.dart';
+import '../app/views/provider_earnings_screen.dart';
 import '../app/views/transaction_receipt_screen.dart';
 import '../controllers/dashboard/bookings/my_bookings_controller.dart';
 import '../controllers/venues/booking_controller.dart';
@@ -136,6 +137,10 @@ class AppPages {
           venue: args["venue"],
         );
       },
+    ),
+    GetPage(
+      name: Routes.providerEarnings,
+      page: () => ProviderEarningsScreen(),
     ),
   ];
 }

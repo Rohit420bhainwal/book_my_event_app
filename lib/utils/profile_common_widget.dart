@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../routes/app_routes.dart';
+
 class CommonProfileLayout extends StatelessWidget {
   final RxBool isLoading;
   final RxString photoUrl;
@@ -8,6 +10,8 @@ class CommonProfileLayout extends StatelessWidget {
   final RxString email;
   final RxString phone;
   final RxString city;
+  final RxString role;
+  final RxString available;
   final VoidCallback onLogout;
   final VoidCallback? onEdit;
 
@@ -19,6 +23,8 @@ class CommonProfileLayout extends StatelessWidget {
     required this.email,
     required this.phone,
     required this.city,
+    required this.role,
+    required this.available,
     required this.onLogout,
     this.onEdit,
   });
@@ -108,6 +114,16 @@ class CommonProfileLayout extends StatelessWidget {
                   _buildInfoCard(context, Icons.location_city, "City", city.value),
                   const SizedBox(height: 10),
                   _buildInfoCard(context, Icons.email, "Email", email.value),
+                  if (role.value == "provider") ...[
+                    const SizedBox(height: 10),
+                    _buildInfoCard(
+                      context,
+                      Icons.money,
+                      "Available Balance",
+                      "₹ ${available.value}",
+                      onTap: () => Get.toNamed(Routes.providerEarnings),
+                    ),
+                  ],
                   const SizedBox(height: 20),
 
                   // Edit Profile
@@ -151,6 +167,7 @@ class CommonProfileLayout extends StatelessWidget {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
@@ -161,7 +178,7 @@ class CommonProfileLayout extends StatelessWidget {
   }
 
   Widget _buildInfoCard(
-      BuildContext context, IconData icon, String title, String value) {
+      BuildContext context, IconData icon, String title, String value,{VoidCallback? onTap}) {
     final primaryColor = Theme.of(context).primaryColor;
     return Card(
       color: Colors.white,
@@ -177,6 +194,7 @@ class CommonProfileLayout extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
+        onTap: onTap,
       ),
     );
   }

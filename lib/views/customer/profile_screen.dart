@@ -19,6 +19,8 @@ class ProfileScreen extends StatelessWidget {
         email: controller.email,
         phone: controller.phone,
         city: controller.city,
+        role:controller.role,
+        available:controller.available,
         onLogout: controller.logout,
       ),
     );

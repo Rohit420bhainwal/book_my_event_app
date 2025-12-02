@@ -3,7 +3,7 @@ import 'package:bookmyevent/views/menulist/menu_list_screen.dart';
 import 'package:bookmyevent/views/provider/provider_add_venue_screen.dart';
 import 'package:bookmyevent/views/provider/provider_home_screen.dart';
 import 'package:bookmyevent/views/provider/provider_orders.dart';
-import 'package:bookmyevent/views/provider/provider_profile_screen.dart';
+import 'package:bookmyevent/app/views/provider_profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

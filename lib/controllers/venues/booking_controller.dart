@@ -151,6 +151,7 @@ class BookingController extends GetxController {
       "serviceId": venue["id"],
       "date": localDate.toIso8601String(), // start-of-day local
       "category": venue['category'] ?? "General",
+      "paymentId": paymentId,
     };
 
     try {
