@@ -23,6 +23,7 @@ class Routes {
   static const String selectCustomerCity = '/customer_city';
   static const venueDetails = '/venue_details';
   static const providerEarnings = '/provider_earnings';
+  static const resetPasswordScreen ='/reset_password';
 
 
 }

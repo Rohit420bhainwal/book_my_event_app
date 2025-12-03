@@ -108,10 +108,14 @@ class AuthController extends GetxController {
   void navigateToRegistrationScreen(){
     Get.offAllNamed(
       Routes.registrationScreen
-      /*Routes.emailPhoneSignup,*/
     );
   }
 
+  void navigateToResetPasswordScreen(){
+    Get.offAllNamed(
+        Routes.resetPasswordScreen
+    );
+  }
 
 
 

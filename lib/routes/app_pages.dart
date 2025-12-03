@@ -1,6 +1,7 @@
 import 'package:bookmyevent/app/views/email_phone_signup_screen.dart';
 import 'package:bookmyevent/app/views/provider_onboarding_screen.dart';
 import 'package:bookmyevent/app/views/registration_screen.dart';
+import 'package:bookmyevent/app/views/reset_password_screen.dart';
 import 'package:bookmyevent/app/views/select_customer_city_screen.dart';
 import 'package:bookmyevent/views/customer/customer_dashboard.dart';
 import 'package:bookmyevent/views/menulist/menu_list_screen.dart';
@@ -141,6 +142,11 @@ class AppPages {
     GetPage(
       name: Routes.providerEarnings,
       page: () => ProviderEarningsScreen(),
+    ),
+
+    GetPage(
+      name: Routes.resetPasswordScreen,
+      page: () => ResetPasswordScreen(),
     ),
   ];
 }
