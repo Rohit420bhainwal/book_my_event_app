@@ -123,6 +123,8 @@ class AppPages {
           initialDescription: args["initialDescription"],
           initialPrice: args["initialPrice"],
           initialImages: args["initialImages"],
+          initialFilledFields: args["initialFilledFields"],
+          initialSelectedServiceId: args["initialSelectedServiceId"],
         );
       },
     ),

@@ -1,22 +1,24 @@
-import 'dart:io';
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
+
 import '../../../app/services/api_service.dart';
 
-class EditServiceController extends GetxController {
-  final ApiService apiService = ApiService();
 
+class EditServiceController extends GetxController {
   final String userId;
   final String serviceId;
   final String initialType;
   final String initialDescription;
   final String initialPrice;
+  final String initialSelectedServiceId;
   final List<dynamic> initialImages;
+  final Map<String, dynamic> initialFilledFields;
 
   EditServiceController({
     required this.userId,
@@ -25,68 +27,81 @@ class EditServiceController extends GetxController {
     required this.initialDescription,
     required this.initialPrice,
     required this.initialImages,
+    required this.initialFilledFields,
+    required this.initialSelectedServiceId,
   });
 
-  var serviceType = ''.obs;
-  var description = ''.obs;
-  var price = ''.obs;
+  final ApiService apiService = ApiService();
+  final ImagePicker picker = ImagePicker();
 
-  // Text controllers
-  late TextEditingController typeController;
+  // Reactive state
+  var isLoading = false.obs;
+  RxString serviceType = "".obs;
+
+  // Existing fields
+  RxList<String> existingImages = <String>[].obs;
+  RxList<String> deletedImages = <String>[].obs;
+  RxList<XFile> selectedImages = <XFile>[].obs;
+
+  // Persistent controllers
   late TextEditingController descriptionController;
   late TextEditingController priceController;
 
-  // Image handling
-  var selectedImages = <File>[].obs;
-  var existingImages = <String>[].obs;
-  var deletedImages = <String>[].obs;
-
-  var isLoading = false.obs;
-  final ImagePicker picker = ImagePicker();
+  // Dynamic Fields controllers
+  Map<String, TextEditingController> dynamicControllers = {};
 
   @override
   void onInit() {
     super.onInit();
-    serviceType.value = initialType;
-    description.value = initialDescription;
-    price.value = initialPrice;
-    existingImages.assignAll(initialImages.map((e) => e.toString()).toList());
+    loadInitialData();
+  }
 
-    // Initialize text controllers
-    typeController = TextEditingController(text: initialType);
+  void loadInitialData() {
+    serviceType.value = initialType;
+
+    /// FIX: Persistent controllers
     descriptionController = TextEditingController(text: initialDescription);
     priceController = TextEditingController(text: initialPrice);
 
-    // Keep reactive values in sync
-    typeController.addListener(() => serviceType.value = typeController.text);
-    descriptionController.addListener(() => description.value = descriptionController.text);
-    priceController.addListener(() => price.value = priceController.text);
-  }
+    /// Existing images
+    existingImages.assignAll(initialImages.map((e) => e.toString()).toList());
 
-  @override
-  void onClose() {
-    typeController.dispose();
-    descriptionController.dispose();
-    priceController.dispose();
-    super.onClose();
+    /// Dynamic fields
+    dynamicControllers.clear();
+    initialFilledFields.forEach((key, value) {
+      dynamicControllers[key] = TextEditingController(text: value.toString());
+    });
   }
 
   Future<void> pickImages() async {
-    final List<XFile>? pickedFiles = await picker.pickMultiImage(
-      imageQuality: 100,
-      maxWidth: 4000,
-      maxHeight: 4000,
-    );
-    if (pickedFiles != null && pickedFiles.isNotEmpty) {
-      selectedImages.assignAll(pickedFiles.map((xfile) => File(xfile.path)));
+    final images = await picker.pickMultiImage();
+    if (images != null) {
+      if (images.length + selectedImages.length > 5) {
+        Get.snackbar("❌ Error", "Max 5 images allowed");
+        return;
+      }
+      selectedImages.addAll(images);
     }
   }
 
-  void removeExistingImage(String imageName) {
-    existingImages.remove(imageName);
-    deletedImages.add(imageName);
+  void deleteExistingImage(String img) {
+    deletedImages.add(img);
+    existingImages.remove(img);
   }
 
+  void removeNewImage(int index) {
+    selectedImages.removeAt(index);
+  }
+
+  String getFilledFieldsJson() {
+    Map<String, dynamic> map = {};
+    dynamicControllers.forEach((key, ctrl) {
+      map[key] = ctrl.text;
+    });
+    return jsonEncode(map);
+  }
+
+  /// YOUR EXACT WORKING CODE + added fields
   Future<void> saveService() async {
     isLoading.value = true;
 
@@ -94,12 +109,15 @@ class EditServiceController extends GetxController {
       List<http.MultipartFile> files = [];
       for (var file in selectedImages) {
         final mimeType = lookupMimeType(file.path) ?? 'image/jpeg';
-        final typeParts = mimeType.split('/');
-        files.add(await http.MultipartFile.fromPath(
-          "images",
-          file.path,
-          contentType: MediaType(typeParts[0], typeParts[1]),
-        ));
+        final parts = mimeType.split('/');
+
+        files.add(
+          await http.MultipartFile.fromPath(
+            "images",
+            file.path,
+            contentType: MediaType(parts[0], parts[1]),
+          ),
+        );
       }
 
       final body = {
@@ -107,8 +125,11 @@ class EditServiceController extends GetxController {
         "action": "edit",
         "serviceId": serviceId,
         "serviceType": serviceType.value,
-        "description": description.value,
-        "price": price.value,
+        "description": descriptionController.text,
+        "price": priceController.text,
+        "selectedServiceId": initialSelectedServiceId,
+
+        "filledFields": getFilledFieldsJson(),
         "existingImages": jsonEncode(existingImages),
         "deletedImages": jsonEncode(deletedImages),
       };
@@ -117,7 +138,7 @@ class EditServiceController extends GetxController {
         endpoint: "auth/provider-service",
         body: body,
         files: files,
-        token: "", // Token handled automatically in ApiService
+        token: "",
       );
 
       if (result["success"] == true) {

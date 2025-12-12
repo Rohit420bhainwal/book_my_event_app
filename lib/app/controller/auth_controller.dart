@@ -38,6 +38,7 @@ class AuthController extends GetxController {
       roleName.value  = response["user"]["role"]??"";
 
       final providerInfo = response["providerInfo"]??"";
+      print("providerInfo $providerInfo");
       status = providerInfo["status"]??"";
       onboardingComplete = providerInfo["onboardingComplete"]??false;
 
@@ -161,7 +162,8 @@ class AuthController extends GetxController {
   }
 
   Future<void> signInWithGoogle() async {
-    try {
+    Get.snackbar("Information", "We will add this feature soon");
+    /*try {
       final googleUser = await _googleSignIn.signIn();
       if (googleUser == null) return;
 
@@ -174,12 +176,13 @@ class AuthController extends GetxController {
       await _auth.signInWithCredential(credential);
     } catch (e) {
       Get.snackbar("Error", e.toString());
-    }
+    }*/
   }
 
   /// ✅ Facebook Sign-In
   Future<void> signInWithFacebook() async {
-    try {
+    Get.snackbar("Information", "We will add this feature soon");
+    /*try {
       final LoginResult result = await FacebookAuth.instance.login();
 
       if (result.status == LoginStatus.success) {
@@ -196,7 +199,7 @@ class AuthController extends GetxController {
       }
     } catch (e) {
       Get.snackbar("Error", e.toString());
-    }
+    }*/
   }
 
   Future<void> logout() async {

@@ -44,6 +44,7 @@ class ProviderHomeScreen extends StatelessWidget {
         }
 
         final allServices = controller.services;
+        print("allServices: $allServices");
 
         return RefreshIndicator(
           onRefresh: controller.fetchProviderServices,
@@ -232,6 +233,8 @@ class ProviderHomeScreen extends StatelessWidget {
                                   "initialDescription": service["description"],
                                   "initialPrice": service["price"].toString(),
                                   "initialImages": service["images"],
+                                  "initialFilledFields": service["filledFields"],
+                                  "initialSelectedServiceId":service["selectedServiceId"],
                                 },
                               );
 
