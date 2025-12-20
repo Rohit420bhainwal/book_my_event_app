@@ -69,4 +69,34 @@ class ProviderBookingDetailController extends GetxController {
       isLoading.value = false;
     }
   }
+
+  Future<void> withdrawPayout(String bookingId) async {
+    try {
+      isLoading.value = true;
+
+      final response = await _apiService.post(
+        "bookings/$bookingId/withdraw",
+        {},
+        withAuth: true,
+      );
+
+      if (response['success'] == true) {
+        booking['payoutStatus'] = 'withdrawn';
+        booking.refresh();
+
+        Get.snackbar(
+          "Success",
+          "Payment withdrawn successfully",
+        );
+      } else {
+        Get.snackbar("Error", "Unable to withdraw payment");
+      }
+    } catch (e) {
+      Get.snackbar("Error", "Withdrawal failed");
+      print("Withdraw error: $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
 }

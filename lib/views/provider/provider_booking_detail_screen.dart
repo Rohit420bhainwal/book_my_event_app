@@ -124,9 +124,16 @@ class ProviderBookingDetailScreen extends StatelessWidget {
               const SizedBox(height: 16),
 
               /// ⭐ RECEIPT CARD
+              /// ⭐ RECEIPT CARD
               paymentReceiptCard(booking),
 
+              const SizedBox(height: 16),
+
+              /// 💰 PAYOUT SECTION (NEW – NON-BREAKING)
+              payoutSection(booking, controller),
+
               const SizedBox(height: 30),
+
 
               /// Action Buttons
               if (status == 'pending')
@@ -183,6 +190,101 @@ class ProviderBookingDetailScreen extends StatelessWidget {
       }),
     );
   }
+
+
+  Widget payoutSection(Map booking, ProviderBookingDetailController controller) {
+    final payoutStatus = booking['payoutStatus']; // pending | available | withdrawn
+    final payoutReleaseDateStr = booking['payoutReleaseDate'];
+    final status = booking['status'];
+
+    DateTime? payoutReleaseDate;
+    if (payoutReleaseDateStr != null) {
+      payoutReleaseDate = DateTime.tryParse(payoutReleaseDateStr);
+    }
+
+    final today = DateTime.now();
+
+    final bool canWithdraw =
+        status == 'confirmed' &&
+            payoutStatus == 'available' &&
+            payoutReleaseDate != null &&
+            !today.isBefore(payoutReleaseDate);
+
+    return Card(
+      elevation: 2,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: const [
+                Icon(Icons.account_balance_wallet,
+                    color: Colors.deepPurple),
+                SizedBox(width: 8),
+                Text(
+                  "Payout",
+                  style: TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 12),
+
+            /// ✅ Withdrawn
+            if (payoutStatus == 'withdrawn')
+              const Text(
+                "✅ Payment withdrawn successfully",
+                style: TextStyle(
+                    color: Colors.green,
+                    fontWeight: FontWeight.w600),
+              )
+
+            /// 🟢 Withdraw Button
+            else if (canWithdraw)
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () =>
+                      controller.withdrawPayout(booking['_id']),
+                  icon: const Icon(Icons.payments, color: Colors.white),
+                  label: const Text(
+                    "Withdraw Amount",
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple,
+                    padding:
+                    const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              )
+
+            /// 🔒 Locked
+            else
+              Text(
+                payoutReleaseDate != null
+                    ? "🔒 Payout will be available on ${DateFormat('dd MMM yyyy').format(payoutReleaseDate)}"
+                    : "🔒 Payout not available yet",
+                style: TextStyle(
+                  color: Colors.grey.shade700,
+                  fontSize: 13,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
 
   // ------------------------
   // IMAGE CAROUSEL

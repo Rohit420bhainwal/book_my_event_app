@@ -71,11 +71,13 @@ class ProviderProfileController extends GetxController {
   Future<void> fetchTotalEarning() async{
     try {
       isLoading.value = true;
-      final response = await apiService.get("withdraw/me",withAuth: true);
+     // final response = await apiService.get("withdraw/me",withAuth: true);
+      final response = await apiService.get("bookings/provider/earnings",withAuth: true);
       print("fetchTotalEarning $response");
       if(response['success']==true){
-        final earnings = response['data']['earnings'];
-        available.value = earnings['available'].toString();
+       // final earnings = response['data']['earnings'];
+       // available.value = earnings['available'].toString();
+        available.value = response['data']['available'].toString();
       }else{
         Get.snackbar("Error", "Unable to get total earning");
       }

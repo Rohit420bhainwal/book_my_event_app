@@ -35,12 +35,14 @@ class RegistrationController extends GetxController {
     isLoading.value = true;
 
     final response = await _apiService.post("auth/send-otp", {
-      "input": email,
+      "input": email.trim(),
       "method": "email",
-      "phone":phone,
-      "password": password,
-      "name":name,
+      "phone":phone.trim(),
+      "password": password.trim(),
+      "name":name.trim(),
     });
+
+    print("response $response");
 
     isLoading.value = false;
 

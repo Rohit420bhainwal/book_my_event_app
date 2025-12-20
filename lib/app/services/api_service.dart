@@ -7,7 +7,7 @@ import '../model/product.dart';
 
 class ApiService {
 
-  static const String baseUrl = "http://192.168.222.85:5000/api";
+  static const String baseUrl = "http://192.168.141.50:5000/api";
   String baseUrl1 = baseUrl;
   String imageUrl = "${baseUrl.replaceAll("/api", "")}/uploads/";
 

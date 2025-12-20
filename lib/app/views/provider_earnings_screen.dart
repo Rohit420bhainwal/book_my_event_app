@@ -21,12 +21,12 @@ class ProviderEarningsScreen extends StatelessWidget {
         elevation: 0.3,
         foregroundColor: Colors.white,
       ),
-      floatingActionButton: FloatingActionButton.extended(
+     /* floatingActionButton: FloatingActionButton.extended(
         backgroundColor: theme.colorScheme.primary,
         onPressed: () => _openWithdrawBottomSheet(context, controller),
         label: const Text("Withdraw", style: TextStyle(color: Colors.white)),
         icon: const Icon(Icons.account_balance_wallet, color: Colors.white),
-      ),
+      ),*/
       body: Obx(() {
         if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
@@ -66,6 +66,11 @@ class ProviderEarningsScreen extends StatelessWidget {
                             "Total Earned",
                             controller.totalEarned.value,
                             theme.colorScheme.primary),
+                        _earningRow(
+                          "Pending To Withdraw",
+                          controller.pending.value,
+                          Colors.orangeAccent,
+                        ),
                         _earningRow(
                             "Total Withdrawn", controller.totalWithdrawn.value, Colors.red),
                         _earningRow(
@@ -152,8 +157,13 @@ class ProviderEarningsScreen extends StatelessWidget {
   }
 
   /// ---------- Earnings Row Widget -----------
-  Widget _earningRow(String title, int amount, Color color,
-      {bool isBold = false, bool biggerText = false}) {
+  Widget _earningRow(
+      String title,
+      double amount,
+      Color color, {
+        bool isBold = false,
+        bool biggerText = false,
+      }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
@@ -161,18 +171,21 @@ class ProviderEarningsScreen extends StatelessWidget {
         children: [
           Text(title, style: AppTextStyles.body),
           Text(
-            "₹$amount",
+            "₹${amount.toStringAsFixed(2)}",
             style: isBold
                 ? AppTextStyles.bodyBold.copyWith(
-                fontSize: biggerText ? 22 : 16, color: color)
+              fontSize: biggerText ? 22 : 16,
+              color: color,
+            )
                 : AppTextStyles.body.copyWith(
-                fontSize: biggerText ? 20 : 16, color: color),
+              fontSize: biggerText ? 20 : 16,
+              color: color,
+            ),
           ),
         ],
       ),
     );
   }
-
   /// ---------- Withdraw Bottom Sheet -----------
   void _openWithdrawBottomSheet(
       BuildContext context, ProviderEarningController controller) {
