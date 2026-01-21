@@ -129,9 +129,15 @@ class AppPages {
       },
     ),
     GetPage(
-      name: Routes.chatScreen,
-      page: () => const ChatScreen(),
+      name: Routes.chatInbox,
+      page: () => ChatScreen(),
     ),
+
+    GetPage(
+      name: Routes.chatScreen,
+      page: () => ChatScreen(),
+    ),
+
     GetPage(
       name: Routes.venueDetails,
       page: () {

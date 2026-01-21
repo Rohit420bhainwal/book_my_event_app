@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controller/edit_service_controller.dart';
+import 'availability_screen.dart';
 
 class EditServiceScreen extends StatelessWidget {
   final String userId;
@@ -205,13 +206,158 @@ class EditServiceScreen extends StatelessWidget {
                 ],
               ),
 
-              const SizedBox(height: 30),
 
-              /// SAVE BUTTON
-              ElevatedButton(
-                onPressed: controller.saveService,
-                child: const Text("Save Service"),
+
+              const SizedBox(height: 20),
+
+              /// AVAILABILITY CARD (PROFESSIONAL)
+              GestureDetector(
+                onTap: () {
+                  Get.to(
+                        () => AvailabilityScreen(
+                      serviceId: serviceId,
+                    ),
+                  );
+                },
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: Colors.grey.shade300),
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      /// ICON
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          Icons.schedule,
+                          color: Colors.blue.shade700,
+                          size: 26,
+                        ),
+                      ),
+
+                      const SizedBox(width: 14),
+
+                      /// TEXT CONTENT
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [
+                            Text(
+                              "Availability",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            SizedBox(height: 6),
+                            Text(
+                              "Set working days and time slots for this service",
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.black54,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(width: 8),
+
+                      /// STATUS + ARROW
+                      Column(
+                        children: const [
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            size: 16,
+                            color: Colors.black45,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               ),
+
+              const SizedBox(height: 30),
+              /// SAVE BUTTON
+              /// SAVE BUTTON (PROFESSIONAL PRIMARY CTA)
+              Obx(
+                    () => Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: ElevatedButton(
+                    onPressed: controller.isSaving.value
+                        ? null
+                        : controller.saveService,
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 56),
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      foregroundColor: Colors.white,
+                      elevation: 6,
+                      shadowColor:
+                      Theme.of(context).colorScheme.primary.withOpacity(0.35),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    child: controller.isSaving.value
+                        ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        SizedBox(
+                          height: 22,
+                          width: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            color: Colors.white,
+                          ),
+                        ),
+                        SizedBox(width: 14),
+                        Text(
+                          "Saving...",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                      ],
+                    )
+                        : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Icon(Icons.save_rounded, size: 22),
+                        SizedBox(width: 10),
+                        Text(
+                          "Save Service",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
             ],
           ),
         ),

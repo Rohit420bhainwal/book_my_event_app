@@ -7,7 +7,7 @@ import '../model/product.dart';
 
 class ApiService {
 
-  static const String baseUrl = "http://192.168.141.50:5000/api";
+  static const String baseUrl = "http://192.168.98.50:5000/api";
   String baseUrl1 = baseUrl;
   String imageUrl = "${baseUrl.replaceAll("/api", "")}/uploads/";
 
@@ -277,6 +277,22 @@ class ApiService {
     } else {
       throw Exception('Failed to load products: ${response.statusCode}');
     }
+  }
+
+  Future<void> sendChatNotification({
+    required String senderId,
+    required String receiverId,
+    required String message,
+  }) async {
+    await post(
+      "send-message-notification",
+      {
+        "senderId": senderId,
+        "receiverId": receiverId,
+        "message": message,
+      },
+      withAuth: false, // JWT if needed
+    );
   }
 
 }

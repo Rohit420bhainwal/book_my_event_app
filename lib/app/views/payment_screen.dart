@@ -1,70 +1,96 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:razorpay_flutter/razorpay_flutter.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import '../../../controllers/venues/booking_controller.dart';
+
+// 🔹 Payment choice enum (same as controller)
+
 
 class PaymentScreen extends StatefulWidget {
   final Map<String, dynamic> venue;
   final int amount;
+  final DateTime selectedDate;
+  final String selectedSlot;
+  final PaymentChoice paymentChoice;
 
-  const PaymentScreen({super.key, required this.venue, required this.amount});
+  const PaymentScreen({
+    super.key,
+    required this.venue,
+    required this.amount,
+    required this.selectedDate,
+    required this.selectedSlot,
+    required this.paymentChoice,
+  });
 
   @override
   State<PaymentScreen> createState() => _PaymentScreenState();
 }
 
 class _PaymentScreenState extends State<PaymentScreen> {
-  late Razorpay razorpay;
   final controller = Get.find<BookingController>();
 
-  var paymentStatus = 0.obs; // 0=processing,1=success,2=failed
-  var bookingMessage = "".obs;
+  final paymentStatus = 0.obs; // 0 = processing, 1 = success, 2 = failed
+  final bookingMessage = "".obs;
 
   @override
   void initState() {
     super.initState();
-
-    razorpay = Razorpay();
-    razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
-    razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
-    razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
-
-    Future.delayed(const Duration(milliseconds: 300), openCheckout);
+    Future.delayed(const Duration(milliseconds: 300), startPayment);
   }
 
-  void openCheckout() {
-    var options = {
-      "key": "rzp_test_icz3AXfa29RYVn",
-      "amount": widget.amount * 100,
-      "name": widget.venue['businessName'],
-      "description": "Venue Booking",
-      "prefill": {"contact": "9876543210", "email": "user@example.com"},
-      "theme": {"color": "#3F51B5"}
-    };
-    razorpay.open(options);
-  }
+  Future<void> startPayment() async {
+    try {
+      paymentStatus.value = 0;
 
-  void _handlePaymentSuccess(PaymentSuccessResponse response) async {
-    paymentStatus.value = 1;
+      final bookingDateIso = widget.selectedDate.toUtc().toIso8601String();
 
-    await Future.delayed(const Duration(seconds: 1));
-    await controller.saveFinalBooking(widget.venue, response.paymentId,onMessage: (msg) {
-      bookingMessage.value = msg;   // <-- update UI
-    },);
-  }
+      final paymentType =
+      widget.paymentChoice == PaymentChoice.full ? "FULL" : "ADVANCE";
+      print("paymentType: $paymentType");
 
-  void _handlePaymentError(PaymentFailureResponse response) {
-    paymentStatus.value = 2;
-  }
+      final body = {
+        "paymentType": paymentType,
+        "providerId": widget.venue['providerId'],
+        "serviceId": widget.venue['id'],
+        "date": bookingDateIso,
+        "slot": widget.selectedSlot,
+        "currency": "usd",
+      };
 
-  void _handleExternalWallet(ExternalWalletResponse response) {
-    Get.snackbar("Wallet Selected", response.walletName!);
-  }
+      // 1️⃣ Create PaymentIntent
+      final response = await controller.api.post(
+        "bookings/payment-intent",
+        body,
+        withAuth: true,
+      );
 
-  @override
-  void dispose() {
-    razorpay.clear();
-    super.dispose();
+      final clientSecret = response['data']['clientSecret'];
+      final paymentIntentId = response['data']['paymentIntentId'];
+
+      // 2️⃣ Init Stripe payment sheet
+      await Stripe.instance.initPaymentSheet(
+        paymentSheetParameters: SetupPaymentSheetParameters(
+          paymentIntentClientSecret: clientSecret,
+          merchantDisplayName: widget.venue['businessName'],
+          style: ThemeMode.light,
+        ),
+      );
+
+      // 3️⃣ Present payment sheet
+      await Stripe.instance.presentPaymentSheet();
+
+      paymentStatus.value = 1;
+
+      // 4️⃣ Confirm booking
+      await controller.saveFinalBooking(
+        widget.venue,
+        paymentIntentId,
+        onMessage: (msg) => bookingMessage.value = msg,
+      );
+    } catch (e) {
+      debugPrint("Stripe Payment Error: $e");
+      paymentStatus.value = 2;
+    }
   }
 
   @override
@@ -80,134 +106,116 @@ class _PaymentScreenState extends State<PaymentScreen> {
         ),
       ),
       body: Obx(() {
-        if (paymentStatus.value == 0) return _processingUI();
+        if (paymentStatus.value == 0) {
+          return Column(
+            children: [
+              _amountSummary(), // 👈 HERE
+              const Expanded(
+                child: Center(child: CircularProgressIndicator()),
+              ),
+            ],
+          );
+        }
         if (paymentStatus.value == 1) return _successUI();
         return _failedUI();
       }),
     );
   }
 
-  // -------------------- PROFESSIONAL UI -------------------- //
+  // =========================
+  // 💰 AMOUNT SUMMARY UI
+  // =========================
+  Widget _amountSummary() {
+    final total = widget.amount;
+    final advance = (total * 0.25).round();
 
-  Widget _processingUI() {
-    return Center(
+    return Material(
+      elevation: 2,
+      borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.all(24),
-        margin: const EdgeInsets.symmetric(horizontal: 20),
-        decoration: _cardDecoration(),
+        margin: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CircularProgressIndicator(
-              color: const Color(0xFF3F51B5),
-              strokeWidth: 4,
-            ),
-            const SizedBox(height: 20),
             const Text(
-              "Processing Payment...",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+              "Payment Summary",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
+            const SizedBox(height: 12),
+            _row("Total Amount", "₹$total"),
             const SizedBox(height: 8),
-            Text(
-              "Please wait while we securely process your payment",
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey.shade700, fontSize: 14),
-            ),
+            if (widget.paymentChoice == PaymentChoice.advance)
+              _row("Pay Now (25%)", "₹$advance"),
+            if (widget.paymentChoice == PaymentChoice.full)
+              _row("Pay Now (100%)", "₹$total"),
           ],
         ),
       ),
     );
   }
 
-  Widget _successUI() {
-    return Center(
-      child: Container(
-        padding: const EdgeInsets.all(24),
-        margin: const EdgeInsets.symmetric(horizontal: 20),
-        decoration: _cardDecoration(),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.check_circle_rounded, size: 130, color: Colors.green.shade600),
-            const SizedBox(height: 20),
-
-            const Text(
-              "Payment Successful!",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-
-            const SizedBox(height: 10),
-
-            // 👇 NEW MESSAGE BELOW PAYMENT STATUS
-            Obx(() => Text(
-              bookingMessage.value,
-              style: const TextStyle(fontSize: 16, color: Colors.black87),
-            )),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _failedUI() {
-    return Center(
-      child: Container(
-        padding: const EdgeInsets.all(24),
-        margin: const EdgeInsets.symmetric(horizontal: 20),
-        decoration: _cardDecoration(),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.error_rounded, size: 130, color: Colors.red.shade700),
-            const SizedBox(height: 20),
-            const Text(
-              "Payment Failed",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              "Something went wrong. Please try again.",
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey.shade700, fontSize: 16),
-            ),
-            const SizedBox(height: 25),
-
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF3F51B5),
-                padding: const EdgeInsets.symmetric(horizontal: 38, vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-              ),
-              onPressed: () {
-                paymentStatus.value = 0;
-                openCheckout();
-              },
-              child: const Text("Retry Payment", style: TextStyle(fontSize: 16,color: Colors.white)),
-            ),
-
-            const SizedBox(height: 10),
-
-            TextButton(
-              onPressed: () => Get.back(),
-              child: const Text("Cancel"),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  BoxDecoration _cardDecoration() {
-    return BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.05),
-          blurRadius: 12,
-          offset: const Offset(0, 4),
+  Widget _row(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label),
+        Text(
+          value,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
       ],
     );
   }
+
+  // =========================
+  // ✅ SUCCESS UI
+  // =========================
+  Widget _successUI() => Center(
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(Icons.check_circle_rounded,
+            size: 130, color: Colors.green),
+        const SizedBox(height: 20),
+        const Text(
+          "Payment Successful!",
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 12),
+        Obx(() => Text(bookingMessage.value)),
+      ],
+    ),
+  );
+
+  // =========================
+  // ❌ FAILED UI
+  // =========================
+  Widget _failedUI() => Center(
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(Icons.error_rounded,
+            size: 130, color: Colors.red),
+        const SizedBox(height: 20),
+        const Text(
+          "Payment Failed",
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 12),
+        ElevatedButton(
+          onPressed: startPayment,
+          child: const Text("Retry"),
+        ),
+        TextButton(
+          onPressed: () => Get.back(),
+          child: const Text("Cancel"),
+        ),
+      ],
+    ),
+  );
 }

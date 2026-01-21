@@ -1,3 +1,6 @@
+import 'package:bookmyevent/app/views/chat_inbox_screen.dart';
+import 'package:bookmyevent/app/views/provider_chat_inbox_screen.dart';
+import 'package:bookmyevent/app/views/stripe_payment_screen.dart';
 import 'package:bookmyevent/controllers/dashboard/provider_dashboard_controller.dart';
 import 'package:bookmyevent/views/menulist/menu_list_screen.dart';
 import 'package:bookmyevent/views/provider/provider_add_venue_screen.dart';
@@ -19,13 +22,21 @@ class ProviderDashboard extends StatelessWidget {
     final String roleName = args["roleName"] ?? "User";
     final String userId = args["userId"] ?? "userId";
 
-    print("Provider token: $token");
+
+
+
+    print("controller.stripeOnboardingCompleted.value ${controller.stripeOnboardingCompleted.value}");
+    if(controller.stripeOnboardingCompleted.value == false) {
+
+    }
 
     final List<Widget> pages = [
       ProviderHomeScreen(token: token, roleName: roleName),
       ProviderOrders(),                     // My Orders tab
       MenuListScreen(token: token, userId:userId,roleName: roleName), // Venue/Menu
       ProviderProfileScreen(),
+      ProviderChatInboxScreen(),
+      /*StripePaymentScreen()*/
     ];
 
     return Obx(() => Scaffold(
@@ -46,6 +57,8 @@ class ProviderDashboard extends StatelessWidget {
               icon: Icon(Icons.add_business), label: "Venue"),
           BottomNavigationBarItem(
               icon: Icon(Icons.person), label: "Profile"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.chat_outlined), label: "Chat"),
         ],
       ),
     ));

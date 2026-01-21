@@ -38,6 +38,12 @@ dependencies:
   carousel_slider: ^4.2.1
   google_fonts: ^6.2.1
   photo_view: ^0.15.0
+  flutter_stripe: ^10.1.1
+  table_calendar: ^3.0.9
+  firebase_messaging: ^15.0.0
+  flutter_local_notifications: ^17.1.0
+  #firebase_analytics: ^11.6.0
+
 
   flutter:
     sdk: flutter
@@ -58,6 +64,7 @@ dependencies:
   file_picker: ^10.3.3
   flutter_facebook_auth: ^7.0.3
   razorpay_flutter: ^1.4.0
+  firebase_database: ^11.3.10
 
 
 dev_dependencies:

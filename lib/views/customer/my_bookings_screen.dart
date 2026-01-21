@@ -1,3 +1,4 @@
+import 'package:bookmyevent/utils/app_text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/dashboard/bookings/my_bookings_controller.dart';
@@ -12,7 +13,7 @@ class MyBookingsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("My Bookings"),
+        title: Text("My Bookings",style: AppTextStyles.heading,),
         backgroundColor: const Color(0xFF3F51B5),
       ),
       body: Obx(() {
@@ -46,6 +47,9 @@ class MyBookingsScreen extends StatelessWidget {
                   break;
                 case "canceled":
                   statusColor = Colors.red;
+                  break;
+                case "completed":
+                  statusColor = Colors.blueAccent;
                   break;
                 default:
                   statusColor = Colors.orange;

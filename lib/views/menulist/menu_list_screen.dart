@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/menu_list_controller.dart';
+import '../../utils/app_text_styles.dart';
 
 class MenuListScreen extends StatelessWidget {
   final String token;
@@ -31,7 +32,7 @@ class MenuListScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: theme.cardColor,
       appBar: AppBar(
-        title: const Text("Add Service"),
+        title: Text("Add Service",style: AppTextStyles.heading),
         centerTitle: true,
         elevation: 1,
       ),

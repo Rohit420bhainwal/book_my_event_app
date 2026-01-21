@@ -23,6 +23,12 @@ class AppTextStyles {
     fontWeight: FontWeight.w600,
   );
 
+  static TextStyle bodyBoldWhite = GoogleFonts.inter(
+    fontSize: 16,
+    fontWeight: FontWeight.w600,
+    color: Colors.white,
+  );
+
   static TextStyle bodyBold13 = GoogleFonts.inter(
     fontSize: 13,
     color: Colors.grey[700],

@@ -77,6 +77,7 @@ class HomeScreen extends StatelessWidget {
                       final venue = controller.filteredFeaturedVenues[index];
                       return GestureDetector(
                         onTap: () {
+                          //print("rating ${venue['rating']}");
                           Get.toNamed(
                             Routes.venueDetails,
                             arguments: {"venue": venue},

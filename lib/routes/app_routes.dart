@@ -24,6 +24,7 @@ class Routes {
   static const venueDetails = '/venue_details';
   static const providerEarnings = '/provider_earnings';
   static const resetPasswordScreen ='/reset_password';
+  static const chatInbox ='/chat_inbox';
 
 
 }

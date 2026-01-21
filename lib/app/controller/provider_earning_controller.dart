@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
+import 'package:get_storage/get_storage.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../services/api_service.dart';
 
 class ProviderEarningController extends GetxController {
@@ -15,77 +16,69 @@ class ProviderEarningController extends GetxController {
 
   var withdrawList = [].obs;
 
+  /// 🔴 STRIPE FLAG
+  var stripeOnboardingCompleted = false.obs;
+
   @override
   void onInit() async {
     super.onInit();
+
+    final box = GetStorage();
+    final userData = box.read("userData");
+
+    stripeOnboardingCompleted.value =
+        userData?["providerInfo"]?["stripeOnboardingCompleted"] ?? false;
+
     await loadEarnings();
-    await loadTotalWithdrawn();
+    await loadWithdrawals();
   }
 
   Future<void> loadEarnings() async {
     try {
       isLoading.value = true;
 
-      final response = await apiService.get("bookings/provider/earnings", withAuth: true);
+      final response =
+      await apiService.get("bookings/provider/earnings",
+          withAuth: true);
 
       final data = response["data"];
 
-
-
-      /// SAFE PARSING (handles int/double/null)
       totalEarned.value = (data["totalEarned"] ?? 0).toDouble();
       totalWithdrawn.value = (data["withdrawn"] ?? 0).toDouble();
       available.value = (data["available"] ?? 0).toDouble();
       pending.value = (data["pending"] ?? 0).toDouble();
-
-     // withdrawList.value = data["withdraws"];
-
-    } catch (e) {
-      print("Error: $e");
     } finally {
       isLoading.value = false;
     }
   }
 
-  Future<void> loadTotalWithdrawn() async {
+  Future<void> loadWithdrawals() async {
+    final response =
+    await apiService.get("withdraw/me", withAuth: true);
+    withdrawList.value = response["data"]["withdraws"];
+  }
+
+  /// 🔴 STRIPE ONBOARDING
+  Future<void> startStripeOnboarding() async {
     try {
-      isLoading.value = true;
+      Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
 
-      final response = await apiService.get("withdraw/me", withAuth: true);
-      print("response $response");
-      final data = response["data"];
-       withdrawList.value = data["withdraws"];
+      final response = await apiService.post("provider/stripe/onboarding-link", {}, withAuth: true);
+      print("onboarding_response $response");
+      Get.back();
 
+      final url = response["data"]["url"];
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     } catch (e) {
-      print("Error: $e");
-    } finally {
-      isLoading.value = false;
+      Get.back();
+      Get.snackbar("Error", "Stripe onboarding failed");
     }
   }
 
   Future<void> requestWithdraw(int amount, String upiId) async {
-    try {
-      Get.dialog(const Center(child: CircularProgressIndicator()),
-          barrierDismissible: false);
-
-      final body = {
-        "amount": amount,
-        "upiId": upiId,
-      };
-
-      final response = await apiService.post("withdraw", body, withAuth: true);
-
-      Get.back();
-
-      if (response["success"] == true) {
-        Get.snackbar("Success", "Withdrawal request submitted");
-        loadEarnings();
-      } else {
-        Get.snackbar("Error", response["message"]);
-      }
-    } catch (e) {
-      Get.back();
-      Get.snackbar("Error", e.toString());
-    }
+    final body = {"amount": amount, "upiId": upiId};
+    await apiService.post("withdraw", body, withAuth: true);
+    loadEarnings();
+    loadWithdrawals();
   }
 }

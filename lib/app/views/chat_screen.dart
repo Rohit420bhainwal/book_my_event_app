@@ -1,146 +1,148 @@
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
-class ChatScreen extends StatelessWidget {
+import '../controller/chat_controller.dart';
+import 'chat_bubble.dart';
+import 'chat_input_bar.dart';
+
+class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final arguments = Get.arguments ?? {};
-    final providerName = arguments["providerName"] ?? "Provider";
-    final profileImage = arguments["providerImage"];
+  State<ChatScreen> createState() => _ChatScreenState();
+}
 
+class _ChatScreenState extends State<ChatScreen> {
+  final ChatController controller = Get.put(ChatController());
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.markChatAsSeen(); // ✅ ONLY ON OPEN
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final loggedInUserId = controller.loggedInUserId;
+    final theme = Theme.of(context);
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
         backgroundColor: theme.colorScheme.primary,
-        title: Row(
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CircleAvatar(
-              radius: 18,
-              backgroundColor: theme.colorScheme.secondary,
-              backgroundImage: (profileImage != null && profileImage.isNotEmpty)
-                  ? NetworkImage(profileImage)
-                  : null,
-              child: (profileImage == null || profileImage.isEmpty)
-                  ? Text(
-                providerName.isNotEmpty
-                    ? providerName[0].toUpperCase()
-                    : "?",
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              )
-                  : null,
-            ),
-            const SizedBox(width: 10),
             Text(
-              providerName,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
+              controller.serviceName,
+              style: const TextStyle(color: Colors.white),
             ),
-          ],
-        ),
-      ),
-      body: Column(
-        children: [
-          // 🗨️ Chat messages
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(12),
-              itemCount: 10,
-              itemBuilder: (context, index) {
-                bool isMe = index % 2 == 0;
-                return Align(
-                  alignment:
-                  isMe ? Alignment.centerRight : Alignment.centerLeft,
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(vertical: 4),
-                    padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: isMe
-                          ? theme.colorScheme.primary.withOpacity(0.1)
-                          : theme.colorScheme.surface,
-                      borderRadius: BorderRadius.only(
-                        topLeft: const Radius.circular(12),
-                        topRight: const Radius.circular(12),
-                        bottomLeft: Radius.circular(isMe ? 12 : 0),
-                        bottomRight: Radius.circular(isMe ? 0 : 12),
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 4,
-                          offset: const Offset(1, 2),
-                        ),
-                      ],
-                    ),
-                    child: Text(
-                      isMe
-                          ? "Hi ${providerName.split(' ').first}!"
-                          : "Hello! How can I help you?",
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: isMe
-                            ? theme.colorScheme.primary
-                            : theme.colorScheme.onSurface,
-                      ),
-                    ),
+            StreamBuilder<DatabaseEvent>(
+              stream: FirebaseDatabase.instance
+                  .ref("presence")
+                  .child(controller.otherUserId)
+                  .onValue,
+              builder: (context, snapshot) {
+                if (!snapshot.hasData ||
+                    snapshot.data!.snapshot.value == null) {
+                  return const Text(
+                    "Offline",
+                    style: TextStyle(color: Colors.white70, fontSize: 12),
+                  );
+                }
+
+                final data =
+                Map<String, dynamic>.from(
+                    snapshot.data!.snapshot.value as Map);
+
+                final isOnline = data["online"] == true;
+                final lastSeenMillis = data["lastSeen"] as int?;
+                final lastSeen = lastSeenMillis != null
+                    ? DateTime.fromMillisecondsSinceEpoch(lastSeenMillis)
+                    : null;
+
+                return Text(
+                  isOnline
+                      ? "Online"
+                      : lastSeen != null
+                      ? "Last seen ${DateFormat('hh:mm a').format(lastSeen)}"
+                      : "Offline",
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 12,
                   ),
                 );
               },
             ),
+
+          ],
+        ),
+      ),
+
+      body: Column(
+        children: [
+          Expanded(
+            child: Obx(() {
+              if (!controller.isChatReady.value) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                stream: controller.messagesStream(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  final docs = snapshot.data!.docs;
+
+                  if (docs.isEmpty) {
+                    return const Center(child: Text("Say hi 👋"));
+                  }
+
+                  // 🔥 Mark DELIVERED
+                  controller.markMessagesAsDelivered();
+
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (_scrollController.hasClients) {
+                      _scrollController.jumpTo(
+                        _scrollController.position.maxScrollExtent,
+                      );
+                    }
+                  });
+
+                  return ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.all(12),
+                    itemCount: docs.length,
+                    itemBuilder: (context, index) {
+                      final msg = docs[index].data();
+                      final isMe =
+                          msg["senderId"] == loggedInUserId;
+
+                      return ChatBubble(
+                        message: msg["text"],
+                        isMe: isMe,
+                        time: msg["createdAt"],
+                        status: msg["status"], // 👈 NEW
+                      );
+                    },
+                  );
+                },
+              );
+            }),
           ),
 
-          // 💬 Message input bar
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surface,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 4,
-                  offset: const Offset(0, -2),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    style: TextStyle(color: theme.colorScheme.onSurface),
-                    decoration: InputDecoration(
-                      hintText: "Type a message...",
-                      hintStyle: TextStyle(
-                        color: theme.colorScheme.onSurface.withOpacity(0.5),
-                      ),
-                      contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        borderSide: BorderSide.none,
-                      ),
-                      fillColor: theme.colorScheme.surface.withOpacity(0.9),
-                      filled: true,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                CircleAvatar(
-                  backgroundColor: theme.colorScheme.primary,
-                  child: IconButton(
-                    icon: const Icon(Icons.send, color: Colors.white),
-                    onPressed: () {},
-                  ),
-                ),
-              ],
-            ),
+          ChatInputBar(
+            onSend: (text) {
+              controller.sendMessage(text, loggedInUserId);
+            },
           ),
         ],
       ),

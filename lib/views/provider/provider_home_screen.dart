@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/dashboard/home/provider_home_controller.dart';
 import '../../routes/app_routes.dart';
+import '../../utils/app_text_styles.dart';
 import '../../utils/full_image_view_screen.dart';
 
 class ProviderHomeScreen extends StatelessWidget {
@@ -22,7 +23,7 @@ class ProviderHomeScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text("My Services"),
+        title: Text("My Services",style: AppTextStyles.heading),
         centerTitle: true,
         backgroundColor: theme.colorScheme.primary,
       ),

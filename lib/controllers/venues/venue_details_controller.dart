@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -9,9 +10,15 @@ class VenueDetailsController extends GetxController {
 
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   var isLoading = true.obs;
+  final box = GetStorage();
+  var currentUserId = "".obs;
 
   @override
   void onInit() {
+    final userData = box.read("userData");
+    if (userData != null) {
+      currentUserId.value = userData["user"]["id"] ?? "";
+    }
     super.onInit();
   }
 

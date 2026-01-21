@@ -28,14 +28,10 @@ class CustomerHomeController extends GetxController {
     try {
       isLoading.value = true;
 
-      final response = await _apiService.get(
-        "auth/services-by-city",
-        withAuth: true,
-      );
+      final response = await _apiService.get("auth/services-by-city", withAuth: true,);
 
       if (response["success"] == true && response["data"] != null) {
         final services = response["data"]["services"] as List<dynamic>;
-
         featuredVenues.value = services.map((service) {
           final List<String> imageList = (service["images"] != null)
               ? List<String>.from(service["images"])
@@ -58,6 +54,7 @@ class CustomerHomeController extends GetxController {
             "price": service["price"] ?? "0",
             "city": service["city"] ?? "",
             "address": service["address"] ?? "",
+            "rating":service["rating"]?? "",
             "providerId": service["providerId"] ?? "",
           };
         }).toList();

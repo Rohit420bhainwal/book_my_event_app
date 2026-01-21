@@ -37,6 +37,7 @@ class EditServiceController extends GetxController {
   // Reactive state
   var isLoading = false.obs;
   RxString serviceType = "".obs;
+  RxBool isSaving = false.obs;
 
   // Existing fields
   RxList<String> existingImages = <String>[].obs;
@@ -106,6 +107,7 @@ class EditServiceController extends GetxController {
     isLoading.value = true;
 
     try {
+      isSaving.value = true;
       List<http.MultipartFile> files = [];
       for (var file in selectedImages) {
         final mimeType = lookupMimeType(file.path) ?? 'image/jpeg';
@@ -150,6 +152,7 @@ class EditServiceController extends GetxController {
     } catch (e) {
       Get.snackbar("Error", e.toString());
     } finally {
+      isSaving.value = false;
       isLoading.value = false;
     }
   }
