@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 
 import '../services/api_service.dart';
@@ -16,7 +17,19 @@ class ChatController extends GetxController {
   final chatId = "".obs;
   final isChatReady = false.obs;
 
-  bool _hasMarkedSeen = false; // 🔥 IMPORTANT
+  static String? _activeChatUserId;
+
+  static void setActiveChat(String userId) {
+    _activeChatUserId = userId;
+  }
+
+  static void clearActiveChat() {
+    _activeChatUserId = null;
+  }
+
+  static bool isChatOpenWith(String senderId) {
+    return _activeChatUserId == senderId;
+  }
 
   @override
   void onInit() {
@@ -30,10 +43,13 @@ class ChatController extends GetxController {
     serviceName = args["serviceName"].toString();
     loggedInUserId = args["loggedInUserId"];
 
+    print("Firebase UID: ${FirebaseAuth.instance.currentUser?.uid}");
+    print("loggedInUserId: $loggedInUserId");
+
     _createOrGetChatRoom();
   }
 
-  /// ================= CHAT ROOM =================
+  // ================= CHAT ROOM =================
 
   String _generateChatId() {
     return "${serviceId}_${customerId}_${providerId}";
@@ -64,34 +80,34 @@ class ChatController extends GetxController {
     isChatReady.value = true;
   }
 
-  /// ================= READ / DELIVERED / SEEN =================
+  // ================= SEEN / DELIVERED =================
 
-  /// ✅ Called ONCE when chat screen opens
+  /// 🔥 MARK SEEN — SAFE TO CALL MULTIPLE TIMES
   Future<void> markChatAsSeen() async {
-    if (_hasMarkedSeen) return;
-    _hasMarkedSeen = true;
+    if (!isChatReady.value) return;
 
     final roomRef =
     _firestore.collection("chat_rooms").doc(chatId.value);
 
-    // 1️⃣ Mark messages as SEEN
     final messagesRef = roomRef.collection("messages");
+
     final snapshot = await messagesRef
         .where("senderId", isNotEqualTo: loggedInUserId)
         .where("status", whereIn: ["sent", "delivered"])
         .get();
 
+    if (snapshot.docs.isEmpty) return;
+
     for (final doc in snapshot.docs) {
       await doc.reference.update({"status": "seen"});
     }
 
-    // 2️⃣ Reset unread ONLY for me
     await roomRef.update({
       "unreadCounts.$loggedInUserId": 0,
     });
   }
 
-  /// ✅ Called when messages arrive on receiver device
+  /// 🔥 MARK DELIVERED
   Future<void> markMessagesAsDelivered() async {
     final messagesRef = _firestore
         .collection("chat_rooms")
@@ -108,7 +124,7 @@ class ChatController extends GetxController {
     }
   }
 
-  /// ================= STREAM =================
+  // ================= STREAM =================
 
   Stream<QuerySnapshot<Map<String, dynamic>>> messagesStream() {
     return _firestore
@@ -119,7 +135,7 @@ class ChatController extends GetxController {
         .snapshots();
   }
 
-  /// ================= SEND MESSAGE =================
+  // ================= SEND MESSAGE =================
 
   Future<void> sendMessage(String text, String senderId) async {
     if (text.trim().isEmpty) return;
@@ -136,7 +152,7 @@ class ChatController extends GetxController {
       "senderId": senderId,
       "text": text,
       "createdAt": FieldValue.serverTimestamp(),
-      "status": "sent", // ✅ SENT
+      "status": "sent",
     });
 
     await roomRef.update({
@@ -152,28 +168,9 @@ class ChatController extends GetxController {
     );
   }
 
-  Stream<DocumentSnapshot<Map<String, dynamic>>> otherUserStatusStream() {
-    final otherUserId =
-    loggedInUserId == customerId ? providerId : customerId;
-
-    return _firestore
-        .collection("users")
-        .doc(otherUserId)
-        .snapshots();
-  }
+  // ================= ONLINE STATUS =================
 
   String get otherUserId {
     return loggedInUserId == customerId ? providerId : customerId;
   }
-
-  bool isUserOnline(Timestamp? lastSeen) {
-    if (lastSeen == null) return false;
-
-    final last = lastSeen.toDate();
-    final now = DateTime.now();
-
-    return now.difference(last).inSeconds < 30;
-  }
-
-
 }

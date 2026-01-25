@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../controllers/provider_booking_detail_controller.dart';
+import '../../utils/date_utils.dart';
 
 class ProviderBookingDetailScreen extends StatelessWidget {
   final String bookingId;
@@ -37,10 +38,8 @@ class ProviderBookingDetailScreen extends StatelessWidget {
         final status = booking['status'] ?? 'pending';
         final List<dynamic> images = service['images'] ?? [];
 
-        final dateStr = booking['date'];
-        final formattedDate = dateStr != null
-            ? DateFormat('dd MMM yyyy').format(DateTime.parse(dateStr))
-            : '';
+        //final dateStr = booking['date'];
+        final formattedDate = AppDateUtils.formatToDDMMYY(booking['date']);
 
         Color statusColor;
         switch (status) {

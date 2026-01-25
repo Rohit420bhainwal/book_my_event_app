@@ -5,6 +5,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 
 import '../../routes/app_routes.dart';
+import '../controller/chat_controller.dart';
 
 
 class FCMService {
@@ -13,16 +14,16 @@ class FCMService {
 
   /// 🔹 Call this in main() after Firebase.initializeApp()
   static Future<void> init() async {
-    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    final FirebaseMessaging messaging = FirebaseMessaging.instance;
 
-    // iOS permission
+    // 🔔 Permission (iOS / Android 13+)
     await messaging.requestPermission(
       alert: true,
       badge: true,
       sound: true,
     );
 
-    // Foreground notification setup
+    // 🔔 Local notification init
     const androidSettings =
     AndroidInitializationSettings('@mipmap/ic_launcher');
     const initSettings = InitializationSettings(android: androidSettings);
@@ -34,29 +35,41 @@ class FCMService {
       },
     );
 
-    // 🔥 Foreground messages
+    // 🔥 FOREGROUND messages
     FirebaseMessaging.onMessage.listen(_onMessage);
 
-    // 🔥 App opened from background
+    // 🔥 Background → foreground (tap)
     FirebaseMessaging.onMessageOpenedApp.listen(_onMessageOpened);
 
-    // 🔥 App opened from terminated
+    // 🔥 Terminated → open
     final initialMessage = await messaging.getInitialMessage();
     if (initialMessage != null) {
       _handleMessage(initialMessage);
     }
   }
 
-  /// 🔹 Foreground message
+  /// 🔹 FOREGROUND message handler
   static void _onMessage(RemoteMessage message) {
-    final notification = message.notification;
-    if (notification == null) return;
-    print("notification_data ${notification}");
+    debugPrint("🔥 FCM RECEIVED (FOREGROUND)");
+    debugPrint("DATA => ${message.data}");
 
+    print("dsds: ");
+    if (message.data['type'] != 'chat') return;
+
+    final senderId = message.data['senderId'];
+    final messageText = message.data['message'] ?? '';
+
+    // 🛑 Chat already open → DO NOT show notification
+    if (ChatController.isChatOpenWith(senderId)) {
+      debugPrint("🛑 Chat open with $senderId → notification skipped");
+      return;
+    }
+
+    // ✅ Show local notification
     _localNotifications.show(
-      notification.hashCode,
-      notification.title,
-      notification.body,
+      DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      "New message",
+      messageText,
       const NotificationDetails(
         android: AndroidNotificationDetails(
           'chat_channel',
@@ -69,16 +82,17 @@ class FCMService {
     );
   }
 
-  /// 🔹 Background → foreground
+  /// 🔹 Notification tapped (background)
   static void _onMessageOpened(RemoteMessage message) {
+    debugPrint("📲 Notification opened (background)");
     _handleMessage(message);
   }
 
-  /// 🔹 Handle navigation
+  /// 🔹 Handle navigation (background / terminated)
   static void _handleMessage(RemoteMessage message) {
     final data = message.data;
+    debugPrint("➡️ HANDLE MESSAGE: $data");
 
-    print("data: ${data}");
     if (data["type"] == "chat") {
       Get.toNamed(
         Routes.chatScreen,
@@ -90,10 +104,13 @@ class FCMService {
     }
   }
 
+  /// 🔹 Local notification tap
   static void _handleNotificationTap(String? payload) {
     if (payload == null) return;
+
     final data = jsonDecode(payload);
-    print("payload_data: ${data}");
+    debugPrint("📦 NOTIFICATION PAYLOAD: $data");
+
     if (data["type"] == "chat") {
       Get.toNamed(
         Routes.chatScreen,

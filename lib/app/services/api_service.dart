@@ -11,9 +11,9 @@ class ApiService {
   String baseUrl1 = baseUrl;
   String imageUrl = "${baseUrl.replaceAll("/api", "")}/uploads/";
 
-/*  static const String baseUrl = "https://book-my-event-api.onrender.com/api";
-  String baseUrl1 = baseUrl;
-  String imageUrl = "${baseUrl.replaceAll("/api", "")}/uploads/";*/
+  // static const String baseUrl = "https://book-my-event-api.onrender.com/api";
+  // String baseUrl1 = baseUrl;
+  // String imageUrl = "${baseUrl.replaceAll("/api", "")}/uploads/";
 
 
 

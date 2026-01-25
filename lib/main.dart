@@ -11,9 +11,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'app/services/fcm_service.dart';
 
 @pragma('vm:entry-point')
-Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+Future<void> firebaseMessagingBackgroundHandler(
+    RemoteMessage message) async {
   await Firebase.initializeApp();
+  // System will auto show notification only if you trigger locally
 }
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

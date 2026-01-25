@@ -3,9 +3,7 @@ import 'package:flutter/widgets.dart';
 
 class PresenceService with WidgetsBindingObserver {
   final String userId;
-
-  final DatabaseReference _db =
-  FirebaseDatabase.instance.ref();
+  final DatabaseReference _db = FirebaseDatabase.instance.ref();
 
   late DatabaseReference _userStatusRef;
   late DatabaseReference _connectedRef;
@@ -19,17 +17,22 @@ class PresenceService with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
 
     _connectedRef.onValue.listen((event) {
-      final connected = event.snapshot.value == true;
-
-      if (connected) {
+      if (event.snapshot.value == true) {
         _setOnline();
       }
     });
   }
 
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    _setOffline();
+  /// 🔥 Call when chat screen opens
+  Future<void> setActiveChat(String otherUserId) async {
+    await _userStatusRef.update({
+      "activeChatWith": otherUserId,
+    });
+  }
+
+  /// 🔥 Call when chat screen closes
+  Future<void> clearActiveChat() async {
+    await _userStatusRef.child("activeChatWith").remove();
   }
 
   void _setOnline() {
@@ -38,7 +41,7 @@ class PresenceService with WidgetsBindingObserver {
       "lastSeen": ServerValue.timestamp,
     });
 
-    _userStatusRef.set({
+    _userStatusRef.update({
       "online": true,
       "lastSeen": ServerValue.timestamp,
     });
@@ -55,8 +58,7 @@ class PresenceService with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       _setOnline();
-    } else if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.detached) {
+    } else {
       _setOffline();
     }
   }

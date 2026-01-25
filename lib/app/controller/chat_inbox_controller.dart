@@ -13,6 +13,7 @@ class ChatInboxController extends GetxController {
     super.onInit();
     //userId = Get.arguments["userId"];
     userId = Get.find<CustomerDashboardController>().currentUserId;
+    print("userId: $userId");
   }
 
   Stream<QuerySnapshot<Map<String, dynamic>>> inboxStream() {

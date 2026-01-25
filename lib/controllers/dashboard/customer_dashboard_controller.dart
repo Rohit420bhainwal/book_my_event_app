@@ -25,6 +25,7 @@ class CustomerDashboardController extends GetxController {
     }
 
     currentUserId = userData["user"]["id"].toString();
+    print("currentUserId: $currentUserId");
     role = userData["user"]["role"].toString();
     final presenceService = PresenceService(currentUserId);
     presenceService.start();

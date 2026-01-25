@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
 import '../controller/chat_controller.dart';
+import '../services/presence_service.dart';
 import 'chat_bubble.dart';
 import 'chat_input_bar.dart';
 
@@ -18,20 +19,21 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final ChatController controller = Get.put(ChatController());
   final ScrollController _scrollController = ScrollController();
-
+  late PresenceService presence;
   @override
   void initState() {
+    // TODO: implement initState
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      controller.markChatAsSeen(); // ✅ ONLY ON OPEN
-    });
+    presence = PresenceService(controller.loggedInUserId);
   }
+
 
   @override
   Widget build(BuildContext context) {
     final loggedInUserId = controller.loggedInUserId;
     final theme = Theme.of(context);
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
@@ -39,10 +41,10 @@ class _ChatScreenState extends State<ChatScreen> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              controller.serviceName,
-              style: const TextStyle(color: Colors.white),
-            ),
+            Text(controller.serviceName,
+                style: const TextStyle(color: Colors.white)),
+
+            /// 🔥 ONLINE / LAST SEEN
             StreamBuilder<DatabaseEvent>(
               stream: FirebaseDatabase.instance
                   .ref("presence")
@@ -63,6 +65,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
                 final isOnline = data["online"] == true;
                 final lastSeenMillis = data["lastSeen"] as int?;
+
                 final lastSeen = lastSeenMillis != null
                     ? DateTime.fromMillisecondsSinceEpoch(lastSeenMillis)
                     : null;
@@ -80,7 +83,6 @@ class _ChatScreenState extends State<ChatScreen> {
                 );
               },
             ),
-
           ],
         ),
       ),
@@ -106,8 +108,14 @@ class _ChatScreenState extends State<ChatScreen> {
                     return const Center(child: Text("Say hi 👋"));
                   }
 
-                  // 🔥 Mark DELIVERED
+                  // 🔥 MARK DELIVERED
                   controller.markMessagesAsDelivered();
+
+                  // 🔥 MARK SEEN (THIS FIXES BLUE TICK)
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    presence.setActiveChat(controller.chatId.value);
+                    controller.markChatAsSeen();
+                  });
 
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     if (_scrollController.hasClients) {
@@ -130,7 +138,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         message: msg["text"],
                         isMe: isMe,
                         time: msg["createdAt"],
-                        status: msg["status"], // 👈 NEW
+                        status: msg["status"],
                       );
                     },
                   );
@@ -147,5 +155,11 @@ class _ChatScreenState extends State<ChatScreen> {
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    presence.clearActiveChat();
+    super.dispose();
   }
 }

@@ -40,9 +40,6 @@ class AuthController extends GetxController {
 
     if (response != null) {
 
-
-
-
       token.value = response["token"] ?? "";
 
       var userId = response["user"]["id"];
