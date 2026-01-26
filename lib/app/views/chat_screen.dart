@@ -26,6 +26,7 @@ class _ChatScreenState extends State<ChatScreen> {
     super.initState();
 
     presence = PresenceService(controller.loggedInUserId);
+    ChatController.setActiveChat(controller.otherUserId);
   }
 
 
@@ -149,7 +150,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
           ChatInputBar(
             onSend: (text) {
-              controller.sendMessage(text, loggedInUserId);
+              controller.sendMessage(text, loggedInUserId,controller.serviceId,controller.serviceName);
             },
           ),
         ],
@@ -159,6 +160,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
+    ChatController.clearActiveChat();
     presence.clearActiveChat();
     super.dispose();
   }

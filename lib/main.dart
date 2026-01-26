@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:bookmyevent/routes/app_pages.dart';
 import 'package:bookmyevent/routes/app_routes.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -13,9 +16,41 @@ import 'app/services/fcm_service.dart';
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(
     RemoteMessage message) async {
+
   await Firebase.initializeApp();
-  // System will auto show notification only if you trigger locally
+
+  final FlutterLocalNotificationsPlugin localNotifications =
+  FlutterLocalNotificationsPlugin();
+
+  const androidSettings =
+  AndroidInitializationSettings('@mipmap/ic_launcher');
+
+  const initSettings =
+  InitializationSettings(android: androidSettings);
+
+  await localNotifications.initialize(initSettings);
+
+  final data = message.data;
+
+  if (data['type'] != 'chat') return;
+
+  print("messageData: ${data}");
+  await localNotifications.show(
+    DateTime.now().millisecondsSinceEpoch ~/ 1000,
+    "New message",
+    data['message'] ?? '',
+    const NotificationDetails(
+      android: AndroidNotificationDetails(
+        'chat_channel',
+        'Chat Notifications',
+        importance: Importance.max,
+        priority: Priority.high,
+      ),
+    ),
+    payload: jsonEncode(data),
+  );
 }
+
 
 
 void main() async {

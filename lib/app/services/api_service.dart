@@ -7,13 +7,13 @@ import '../model/product.dart';
 
 class ApiService {
 
-  static const String baseUrl = "http://192.168.98.50:5000/api";
-  String baseUrl1 = baseUrl;
-  String imageUrl = "${baseUrl.replaceAll("/api", "")}/uploads/";
-
-  // static const String baseUrl = "https://book-my-event-api.onrender.com/api";
+  // static const String baseUrl = "http://192.168.98.50:5000/api";
   // String baseUrl1 = baseUrl;
   // String imageUrl = "${baseUrl.replaceAll("/api", "")}/uploads/";
+
+  static const String baseUrl = "https://book-my-event-api.onrender.com/api";
+  String baseUrl1 = baseUrl;
+  String imageUrl = "${baseUrl.replaceAll("/api", "")}/uploads/";
 
 
 
@@ -282,6 +282,8 @@ class ApiService {
   Future<void> sendChatNotification({
     required String senderId,
     required String receiverId,
+    required String serviceId,
+    required String serviceName,
     required String message,
   }) async {
     await post(
@@ -289,6 +291,8 @@ class ApiService {
       {
         "senderId": senderId,
         "receiverId": receiverId,
+        "serviceId":serviceId,
+        "serviceName":serviceName,
         "message": message,
       },
       withAuth: false, // JWT if needed

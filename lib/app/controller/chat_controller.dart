@@ -28,6 +28,7 @@ class ChatController extends GetxController {
   }
 
   static bool isChatOpenWith(String senderId) {
+    print("senderId: $senderId");
     return _activeChatUserId == senderId;
   }
 
@@ -57,6 +58,7 @@ class ChatController extends GetxController {
 
   Future<void> _createOrGetChatRoom() async {
     final id = _generateChatId();
+    print("_generateChatId: $id");
     chatId.value = id;
 
     final ref = _firestore.collection("chat_rooms").doc(id);
@@ -137,9 +139,10 @@ class ChatController extends GetxController {
 
   // ================= SEND MESSAGE =================
 
-  Future<void> sendMessage(String text, String senderId) async {
+  Future<void> sendMessage(String text, String senderId, String serviceId, String serviceName) async {
     if (text.trim().isEmpty) return;
 
+    print("serviceId: $serviceId");
     final roomRef =
     _firestore.collection("chat_rooms").doc(chatId.value);
 
@@ -164,6 +167,8 @@ class ChatController extends GetxController {
     await _apiService.sendChatNotification(
       senderId: senderId,
       receiverId: receiverId,
+      serviceId: serviceId,
+      serviceName: serviceName,
       message: text,
     );
   }
