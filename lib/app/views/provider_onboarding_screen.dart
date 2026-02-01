@@ -152,7 +152,39 @@ class ProviderOnboardingScreen extends StatelessWidget {
           keyboardType: TextInputType.emailAddress),
       _inputField(controller.addressController, "Business Address",
           maxLines: 2),
-      _inputField(controller.cityController, "City"),
+     // _inputField(controller.cityController, "City"),
+// inside _buildBasicInfoStep()
+
+      Obx(() => DropdownButtonFormField<String>(
+        value: controller.selectedCity.value.isEmpty
+            ? null
+            : controller.selectedCity.value,
+        items: controller.uaeCities
+            .map(
+              (city) => DropdownMenuItem(
+            value: city,
+            child: Text(city),
+          ),
+        )
+            .toList(),
+        onChanged: (value) {
+          controller.selectedCity.value = value ?? "";
+        },
+        decoration: InputDecoration(
+          labelText: "City",
+          filled: true,
+          fillColor: Colors.grey.shade50,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: const BorderSide(color: Colors.indigo, width: 1.8),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          contentPadding:
+          const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        ),
+      )),
 
       const SizedBox(height: 8),
 

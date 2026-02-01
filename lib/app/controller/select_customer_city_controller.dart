@@ -14,24 +14,50 @@ class SelectCustomerCityController extends GetxController {
   final box = GetStorage();
 
   final List<String> allCities = [
-    'Mumbai',
-    'Pune',
-    'Delhi',
-    'Bengaluru',
-    'Hyderabad',
-    'Chennai',
-    'Kolkata',
-    'Ahmedabad',
-    'Surat',
-    'Jaipur',
-    'Nagpur',
-    'Indore',
-    'Bhopal',
-    'Nashik',
-    'Lucknow',
-    'Chandigarh',
-    'Goa',
+    "Abu Dhabi",
+    "Dubai",
+    "Sharjah",
+    "Ajman",
+    "Umm Al Quwain",
+    "Ras Al Khaimah",
+    "Fujairah",
+
+    "Al Ain",
+    "Madinat Zayed",
+    "Ruwais",
+    "Liwa",
+    "Ghayathi",
+    "Mirfa",
+    "Sila",
+    "Al Wathba",
+    "Bani Yas",
+    "Khalifa City",
+    "Masdar City",
+
+    "Khor Fakkan",
+    "Kalba",
+    "Dhaid",
+    "Dibba Al-Hisn",
+    "Al Madam",
+    "Mleiha",
+
+    "Dibba Al-Fujairah",
+    "Masafi",
+    "Qidfa",
+    "Al Bithnah",
+
+    "Hatta",
+    "Jebel Ali",
+
+    "Al Jazirah Al Hamra",
+    "Khatt",
+    "Al Rams",
+    "Sha'am",
+
+    "Umm Al Quwain City",
+    "Falaj Al Mualla"
   ];
+
 
   var filteredCities = <String>[].obs;
   var isLoading = false.obs;

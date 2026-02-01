@@ -24,6 +24,44 @@ class ProviderOnboardingController extends GetxController {
   final addressController = TextEditingController();
   final cityController = TextEditingController();
 
+  var selectedCity = "".obs;
+  /// 🔹 UAE CITY LIST
+  final List<String> uaeCities = [
+    "Abu Dhabi",
+    "Dubai",
+    "Sharjah",
+    "Ajman",
+    "Umm Al Quwain",
+    "Ras Al Khaimah",
+    "Fujairah",
+    "Al Ain",
+    "Madinat Zayed",
+    "Ruwais",
+    "Liwa",
+    "Ghayathi",
+    "Mirfa",
+    "Sila",
+    "Khalifa City",
+    "Masdar City",
+    "Khor Fakkan",
+    "Kalba",
+    "Dhaid",
+    "Dibba Al-Hisn",
+    "Al Madam",
+    "Mleiha",
+    "Dibba Al-Fujairah",
+    "Masafi",
+    "Qidfa",
+    "Hatta",
+    "Jebel Ali",
+    "Al Jazirah Al Hamra",
+    "Khatt",
+    "Al Rams",
+    "Sha'am",
+    "Umm Al Quwain City",
+    "Falaj Al Mualla"
+  ];
+
   // Government ID
   var idType = "".obs;
   Rxn<File> idFrontFile = Rxn<File>();
@@ -202,7 +240,9 @@ class ProviderOnboardingController extends GetxController {
             phoneController.text.trim().isEmpty ||
             emailController.text.trim().isEmpty ||
             addressController.text.trim().isEmpty ||
-            cityController.text.trim().isEmpty) {
+            selectedCity.value.trim().isEmpty
+            /*cityController.text.trim().isEmpty*/) {
+          print("selectedCity: ${selectedCity.value.trim()}");
           Get.snackbar("Error", "Please fill all basic info fields");
           return false;
         }
@@ -394,7 +434,8 @@ class ProviderOnboardingController extends GetxController {
         "phone": phoneController.text.trim(),
         "email": emailController.text.trim(),
         "address": addressController.text.trim(),
-        "city": cityController.text.trim(),
+       // "city": cityController.text.trim(),
+        "city": selectedCity.value.trim(),
         "images": imageFiles,
         "status": "pending",
         "idType": idType.value ?? "",
