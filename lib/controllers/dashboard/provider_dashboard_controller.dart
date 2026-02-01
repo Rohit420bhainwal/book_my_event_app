@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
 import '../../app/services/api_service.dart';
+import '../../app/services/fcm_service.dart';
 import '../../app/services/presence_service.dart';
 
 
@@ -18,7 +19,7 @@ class ProviderDashboardController extends GetxController {
     selectedIndex.value = index;
   }
   @override
-  void onInit() {
+  void onInit() async {
     final userData = box.read("userData");
     currentUserId = userData["user"]["id"].toString();
     final presenceService = PresenceService(currentUserId);
@@ -29,6 +30,9 @@ class ProviderDashboardController extends GetxController {
       updateStripeAccountId();
     }
     super.onInit();
+
+    await FCMService.init();
+
   }
 
   Future<void> updateStripeAccountId() async{

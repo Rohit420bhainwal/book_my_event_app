@@ -55,19 +55,22 @@ Future<void> firebaseMessagingBackgroundHandler(
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await GetStorage.init();
   await Firebase.initializeApp();
+
 
   // 🔥 REGISTER BACKGROUND HANDLER (HERE)
   FirebaseMessaging.onBackgroundMessage(
     firebaseMessagingBackgroundHandler,
   );
 
-  await FCMService.init();
+  //await FCMService.init();
  // runApp(BookMyEventApp());
-  await GetStorage.init();
-  Stripe.publishableKey = "pk_test_51Sh33oCtpKweHSzBMdAE7de66uGJ4oGD1PwRHWNmMqzJ9ANZlvfwhsu7fTPs7g2FegRIR134GPaIVgegMkOcqJQw00wgzzAeTN";
 
-  await Stripe.instance.applySettings();
+   Stripe.publishableKey = "pk_test_51Sh33oCtpKweHSzBMdAE7de66uGJ4oGD1PwRHWNmMqzJ9ANZlvfwhsu7fTPs7g2FegRIR134GPaIVgegMkOcqJQw00wgzzAeTN";
+  //
+  print("HERE!");
+   await Stripe.instance.applySettings();
 
   runApp(const BookMyEventApp());
 }
@@ -83,7 +86,7 @@ class BookMyEventApp extends StatelessWidget {
       initialRoute: Routes.splash,
       getPages: AppPages.routes,
       theme: ThemeData(
-        useMaterial3: true,
+      //  useMaterial3: true,
         primaryColor: const Color(0xFF3F51B5), // Blue
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF3F51B5), // Indigo/Blue

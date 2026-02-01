@@ -8,6 +8,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:get_storage/get_storage.dart';
 
+import '../app/services/fcm_service.dart';
 import '../routes/app_routes.dart';
 import '../utils/constants.dart';
 
@@ -21,6 +22,7 @@ class SplashController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+   // Future.microtask(() => FCMService.init());
     _runStartupChecks();
   }
 

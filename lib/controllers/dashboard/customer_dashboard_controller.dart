@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
+import '../../app/services/fcm_service.dart';
 import '../../app/services/presence_service.dart';
 
 
@@ -14,7 +15,7 @@ class CustomerDashboardController extends GetxController {
   }
 
   @override
-  void onInit() {
+  void onInit() async{
     super.onInit();
 
     final box = GetStorage();
@@ -29,6 +30,9 @@ class CustomerDashboardController extends GetxController {
     role = userData["user"]["role"].toString();
     final presenceService = PresenceService(currentUserId);
     presenceService.start();
+
+    await FCMService.init();
+
 
   }
 }

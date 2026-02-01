@@ -96,6 +96,7 @@ class ProviderBookingDetailController extends GetxController {
     (booking['providerEarning'] as num).toDouble();
 
     print("providerEarning $providerEarning");
+    print("bookingId $bookingId");
 
     try {
       isLoading.value = true;
