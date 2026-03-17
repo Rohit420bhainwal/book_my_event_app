@@ -24,6 +24,7 @@ class AuthController extends GetxController {
 
   Future<void> login(String username, String password) async {
     isLoading.value = true;
+
     final response = await _apiService.loginUser(
       username: username,
       password: password,

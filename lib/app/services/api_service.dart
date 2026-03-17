@@ -7,11 +7,15 @@ import '../model/product.dart';
 
 class ApiService {
 
-  // static const String baseUrl = "http://192.168.98.50:5000/api";
+  // static const String baseUrl = "http://192.168.27.50:5000/api";
   // String baseUrl1 = baseUrl;
   // String imageUrl = "${baseUrl.replaceAll("/api", "")}/uploads/";
 
-  static const String baseUrl = "https://book-my-event-api.onrender.com/api";
+  // static const String baseUrl = "https://book-my-event-api.onrender.com/api";
+  // String baseUrl1 = baseUrl;
+  // String imageUrl = "${baseUrl.replaceAll("/api", "")}/uploads/";
+
+  static const String baseUrl = "http://54.206.156.194:5000/api";
   String baseUrl1 = baseUrl;
   String imageUrl = "${baseUrl.replaceAll("/api", "")}/uploads/";
 
@@ -95,6 +99,8 @@ class ApiService {
     required String username,
     required String password,
   }) async {
+    print("username: $username");
+    print("password: $password");
     final url = Uri.parse("$baseUrl/auth/login");
     try {
       final response = await http.post(
@@ -104,6 +110,7 @@ class ApiService {
         },
         body: jsonEncode({
           "email": username,
+          /*"phone": username,*/
           "password": password,
          /* "clientName": "BME",
           "inputSource": "M",*/

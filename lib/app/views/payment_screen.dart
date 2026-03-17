@@ -11,7 +11,7 @@ class PaymentScreen extends StatefulWidget {
   final int amount;
   final DateTime selectedDate;
   final String selectedSlot;
-  final PaymentChoice paymentChoice;
+  //final PaymentChoice paymentChoice;
 
   const PaymentScreen({
     super.key,
@@ -19,7 +19,7 @@ class PaymentScreen extends StatefulWidget {
     required this.amount,
     required this.selectedDate,
     required this.selectedSlot,
-    required this.paymentChoice,
+    //required this.paymentChoice,
   });
 
   @override
@@ -44,12 +44,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
       final bookingDateIso = widget.selectedDate.toUtc().toIso8601String();
 
-      final paymentType =
-      widget.paymentChoice == PaymentChoice.full ? "FULL" : "ADVANCE";
-      print("paymentType: $paymentType");
+    //  final paymentType =
+    //  widget.paymentChoice == PaymentChoice.full ? "FULL" : "ADVANCE";
+   //   print("paymentType: $paymentType");
 
       final body = {
-        "paymentType": paymentType,
+       // "paymentType": paymentType,
         "providerId": widget.venue['providerId'],
         "serviceId": widget.venue['id'],
         "date": bookingDateIso,
@@ -80,13 +80,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
       await Stripe.instance.presentPaymentSheet();
 
       paymentStatus.value = 1;
-
+/*
       // 4️⃣ Confirm booking
       await controller.saveFinalBooking(
         widget.venue,
         paymentIntentId,
         onMessage: (msg) => bookingMessage.value = msg,
-      );
+      );*/
     } catch (e) {
       debugPrint("Stripe Payment Error: $e");
       paymentStatus.value = 2;
@@ -149,10 +149,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
             const SizedBox(height: 12),
             _row("Total Amount", "₹$total"),
             const SizedBox(height: 8),
-            if (widget.paymentChoice == PaymentChoice.advance)
-              _row("Pay Now (25%)", "₹$advance"),
-            if (widget.paymentChoice == PaymentChoice.full)
-              _row("Pay Now (100%)", "₹$total"),
+            // if (widget.paymentChoice == PaymentChoice.advance)
+            //   _row("Pay Now (25%)", "₹$advance"),
+            // if (widget.paymentChoice == PaymentChoice.full)
+            //   _row("Pay Now (100%)", "₹$total"),
           ],
         ),
       ),

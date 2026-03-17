@@ -114,16 +114,16 @@ class CommonProfileLayout extends StatelessWidget {
                   _buildInfoCard(context, Icons.location_city, "City", city.value),
                   const SizedBox(height: 10),
                   _buildInfoCard(context, Icons.email, "Email", email.value),
-                  if (role.value == "provider") ...[
-                    const SizedBox(height: 10),
-                    _buildInfoCard(
-                      context,
-                      Icons.money,
-                      "Available Balance",
-                      "₹ ${available.value}",
-                      onTap: () => Get.toNamed(Routes.providerEarnings),
-                    ),
-                  ],
+                  // if (role.value == "provider") ...[
+                  //   const SizedBox(height: 10),
+                  //   _buildInfoCard(
+                  //     context,
+                  //     Icons.money,
+                  //     "Available Balance",
+                  //     "₹ ${available.value}",
+                  //     onTap: () => Get.toNamed(Routes.providerEarnings),
+                  //   ),
+                  // ],
                   const SizedBox(height: 20),
 
                   // Edit Profile
