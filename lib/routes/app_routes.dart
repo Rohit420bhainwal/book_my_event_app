@@ -21,5 +21,10 @@ class Routes {
   static const editService = '/edit_service';
   static const String chatScreen = '/chat_screen';
   static const String selectCustomerCity = '/customer_city';
+  static const venueDetails = '/venue_details';
+  static const providerEarnings = '/provider_earnings';
+  static const resetPasswordScreen ='/reset_password';
+  static const chatInbox ='/chat_inbox';
+
 
 }

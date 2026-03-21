@@ -145,6 +145,7 @@ class LoginScreen extends StatelessWidget {
                     children: [
                       TextButton(
                         onPressed: () {
+                          authController.navigateToResetPasswordScreen();
                           // TODO: Forgot Password
                         },
                         child: Text(

@@ -53,14 +53,14 @@ class DummyPaymentScreen extends StatelessWidget {
                   final txnId = DateTime.now().millisecondsSinceEpoch.toString();
 
                   // Call booking controller with venueId
-                  controller.bookVenue(
-                    args
-                   /* venueId: venueId,
-                    venueName: venueName,
-                    venueImage: venueImage,
-                    txnId: txnId,
-                    providerId: providerId,*/
-                  );
+                  // controller.bookVenue(
+                  //   args
+                  //  /* venueId: venueId,
+                  //   venueName: venueName,
+                  //   venueImage: venueImage,
+                  //   txnId: txnId,
+                  //   providerId: providerId,*/
+                  // );
                 },
                 child: const Text("Pay Now",
                     style: TextStyle(color: Colors.white, fontSize: 18)),

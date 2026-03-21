@@ -33,4 +33,29 @@ class AppDateUtils {
       return rawDate;
     }
   }
+
+  static String formatDate(String dateString) {
+    try {
+      DateTime dt = DateTime.parse(dateString).toLocal();
+      return "${dt.day.toString().padLeft(2, '0')} "
+          "${_month(dt.month)} "
+          "${dt.year} – "
+          "${_two(dt.hour)}:${_two(dt.minute)} "
+          "${dt.hour >= 12 ? 'PM' : 'AM'}";
+    } catch (e) {
+      return "";
+    }
+  }
+
+  static String _month(int m) {
+    const months = [
+      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    ];
+    return months[m - 1];
+  }
+
+  static String _two(int n) => n.toString().padLeft(2, '0');
+
+
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../controllers/dashboard/profile/provider_profile_controller.dart';
+import '../controller/provider_profile_controller.dart';
 import '../../utils/profile_common_widget.dart';
 
 
@@ -20,6 +20,8 @@ class ProviderProfileScreen extends StatelessWidget {
         email: controller.email,
         phone: controller.phone,
         city: controller.city,
+        role:controller.role,
+        available:controller.available,
         onLogout: controller.logout,
       ),
     );

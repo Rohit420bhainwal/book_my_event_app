@@ -5,14 +5,16 @@ import '../../../controllers/venues/venue_details_controller.dart';
 import '../../../routes/app_routes.dart';
 
 class VenueDetailsScreen extends StatelessWidget {
-  const VenueDetailsScreen({super.key});
+  final Map<String, dynamic> venue;
+  const VenueDetailsScreen({super.key,required this.venue});
 
   @override
   Widget build(BuildContext context) {
     final args = (Get.arguments ?? {}) as Map<String, dynamic>;
-    final Map<String, dynamic> venueData = args["venue"] ?? {};
+   // final Map<String, dynamic> venueData = args["venue"] ?? {};
+    final Map<String, dynamic> venueData = venue;
     final controller = Get.put(VenueDetailsController(venue: venueData));
-
+    print("venue: ${venueData}");
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -22,6 +24,8 @@ class VenueDetailsScreen extends StatelessWidget {
           }
 
           final venue = controller.venue;
+          print("venue $venue");
+
           final List images = (venue["images"] ?? []) as List;
           final String location = venue["address"] ?? "Unknown Address";
           final String city = venue["city"] ?? "Unknown City";
@@ -37,6 +41,9 @@ class VenueDetailsScreen extends StatelessWidget {
           final String price = venue["price"] ?? "0";
           final String createdAt = venue["createdAt"] ?? "";
           final String updatedAt = venue["updatedAt"] ?? "";
+          final String rating = venue['rating']?.toString() ?? "0";
+          final double ratingValue = double.tryParse(rating) ?? 0.0;
+
 
           final formattedCreated = createdAt.isNotEmpty
               ? DateFormat('dd MMM yyyy, hh:mm a')
@@ -106,6 +113,21 @@ class VenueDetailsScreen extends StatelessWidget {
                       physics: const BouncingScrollPhysics(),
                       children: [
                         // 🏢 Business Name & Category
+                        Row(
+                          children: [
+                            buildStarRating(ratingValue, size: 20),
+                            const SizedBox(width: 6),
+                            Text(
+                              ratingValue.toStringAsFixed(1),
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ],
+                        ),
+
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -237,6 +259,7 @@ class VenueDetailsScreen extends StatelessWidget {
                       const SizedBox(width: 12),
 
                       // 💬 Chat Button
+                      // 💬 Chat Button
                       IconButton.filled(
                         style: IconButton.styleFrom(
                           backgroundColor: Colors.blue.shade600,
@@ -244,18 +267,35 @@ class VenueDetailsScreen extends StatelessWidget {
                           minimumSize: const Size(48, 48),
                         ),
                         onPressed: () {
+                          final customerId = controller.currentUserId.value;
+
+                          final providerId = venue["providerId"]?.toString() ?? "";
+                          final serviceId = venue["id"]?.toString() ?? "";
+
+                          print("providerId: $providerId");
+                          print("serviceId: $serviceId");
+                          if (providerId.isEmpty || serviceId.isEmpty) {
+                            Get.snackbar("Error", "Chat data missing");
+                            return;
+                          }
+
                           Get.toNamed(
                             Routes.chatScreen,
                             arguments: {
-                              "providerId": venue["providerId"],
-                              "providerName": venue["providerName"],
-                              "providerEmail": venue["providerEmail"],
+                              "providerId": providerId,
+                              "customerId": customerId,
+                              "serviceId": serviceId,
+                              "serviceName": businessName.toString(),
+                              "providerName": providerName.toString(),
+                              "loggedInUserId":customerId,
                             },
                           );
                         },
+
                         icon: const Icon(Icons.chat_bubble_outline),
                         tooltip: 'Chat with Provider',
                       ),
+
                       const SizedBox(width: 12),
 
                       // 📅 Book Now Button (Expanded)
@@ -292,6 +332,29 @@ class VenueDetailsScreen extends StatelessWidget {
       ),
     );
   }
+
+  Widget buildStarRating(double rating,
+      {int maxStars = 5, double size = 18}) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(maxStars, (index) {
+        if (index < rating.floor()) {
+          // Full star
+          return Icon(Icons.star,
+              color: Colors.amber, size: size);
+        } else if (index < rating && rating - index >= 0.5) {
+          // Half star
+          return Icon(Icons.star_half,
+              color: Colors.amber, size: size);
+        } else {
+          // Empty star
+          return Icon(Icons.star_border,
+              color: Colors.grey.shade400, size: size);
+        }
+      }),
+    );
+  }
+
 
   // 🔹 Reusable info row widget
   Widget _infoRow(IconData icon, String title, String value) {

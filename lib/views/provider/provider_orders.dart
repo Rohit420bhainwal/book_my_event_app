@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../controllers/provider_order_controller.dart';
+import '../../utils/app_text_styles.dart';
+import '../../utils/date_utils.dart';
 
 class ProviderOrders extends StatelessWidget {
   const ProviderOrders({super.key});
@@ -17,7 +19,7 @@ class ProviderOrders extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("My Orders"),
+        title: Text("My Orders",style: AppTextStyles.heading,),
         backgroundColor: const Color(0xFF3F51B5),
       ),
       body: Obx(() {
@@ -57,7 +59,7 @@ class ProviderOrders extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text("Status: ${booking["status"] ?? "pending"}"),
-                    Text("Date: ${booking["date"]?.split("T").first ?? ""}"),
+                    Text("Date: ${AppDateUtils.formatToDDMMYY(booking["date"])}",),
                   ],
                 ),
                 trailing: const Icon(Icons.arrow_forward_ios),

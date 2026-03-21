@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
+
 import '../../routes/app_routes.dart';
 import '../controller/registration_controller.dart';
 
@@ -36,7 +38,7 @@ class RegistrationScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
-            // Full Name
+            /// Full Name
             TextField(
               controller: controller.nameController,
               decoration: InputDecoration(
@@ -47,9 +49,10 @@ class RegistrationScreen extends StatelessWidget {
                 ),
               ),
             ),
+
             const SizedBox(height: 16),
 
-            // Email
+            /// Email
             TextField(
               controller: controller.emailController,
               keyboardType: TextInputType.emailAddress,
@@ -61,23 +64,27 @@ class RegistrationScreen extends StatelessWidget {
                 ),
               ),
             ),
+
             const SizedBox(height: 16),
 
-            // Mobile Number
-            TextField(
+            /// Phone with Country Code
+            IntlPhoneField(
               controller: controller.phoneController,
-              keyboardType: TextInputType.phone,
               decoration: InputDecoration(
                 labelText: "Mobile Number",
-                prefixIcon: const Icon(Icons.phone_outlined),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
+              initialCountryCode: 'IN',
+              onChanged: (phone) {
+                controller.fullPhoneNumber.value = phone.completeNumber;
+              },
             ),
+
             const SizedBox(height: 16),
 
-            // Password (with toggle)
+            /// Password
             Obx(
                   () => TextField(
                 controller: controller.passwordController,
@@ -90,7 +97,6 @@ class RegistrationScreen extends StatelessWidget {
                       controller.isPasswordVisible.value
                           ? Icons.visibility
                           : Icons.visibility_off,
-                      color: Colors.grey,
                     ),
                     onPressed: controller.togglePasswordVisibility,
                   ),
@@ -100,9 +106,10 @@ class RegistrationScreen extends StatelessWidget {
                 ),
               ),
             ),
+
             const SizedBox(height: 30),
 
-            // Register Button
+            /// Register Button
             Obx(
                   () => ElevatedButton(
                 onPressed: controller.isLoading.value
@@ -131,12 +138,13 @@ class RegistrationScreen extends StatelessWidget {
                 ),
               ),
             ),
+
             const SizedBox(height: 16),
 
-            // Login link
+            /// Login Button
             Center(
               child: TextButton(
-                onPressed: () =>   Get.offAllNamed(Routes.login),
+                onPressed: () => Get.offAllNamed(Routes.login),
                 child: const Text(
                   "Already have an account? Login",
                   style: TextStyle(color: Color(0xFF3F51B5)),

@@ -1,15 +1,18 @@
 import 'package:bookmyevent/app/services/api_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 
 class ProfileController extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-
+  final box = GetStorage();
   var displayName = "".obs;
   var email = "".obs;
   var phone = "".obs;
   var city = "".obs;
   var photoUrl = "".obs;
+  var role = "".obs;
+  var available = "".obs;
 
   ApiService apiService = ApiService();
   var isLoading = true.obs;
@@ -19,6 +22,10 @@ class ProfileController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    final userData = box.read("userData");
+    if (userData != null) {
+      role.value = userData["user"]["role"] ?? "";
+    }
     fetchUserProfile();
   }
 
@@ -58,6 +65,7 @@ class ProfileController extends GetxController {
 
   Future<void> logout() async {
     await _auth.signOut();
+    await box.erase();
     Get.offAllNamed("/login");
   }
 }

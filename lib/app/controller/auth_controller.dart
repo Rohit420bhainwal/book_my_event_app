@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,7 +13,7 @@ class AuthController extends GetxController {
   static AuthController instance = Get.find();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+ // final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   final ApiService _apiService = ApiService();
   var isLoading = false.obs;
@@ -23,21 +24,63 @@ class AuthController extends GetxController {
 
   Future<void> login(String username, String password) async {
     isLoading.value = true;
+
     final response = await _apiService.loginUser(
       username: username,
       password: password,
     );
     isLoading.value = false;
 
+    final fcm = FirebaseMessaging.instance;
+
+    final fcmToken = await fcm.getToken();
+
+    print("🔥 FCM TOKEN: $fcmToken");
+
+    print("loginResponse: $response");
+
     if (response != null) {
 
       token.value = response["token"] ?? "";
 
       var userId = response["user"]["id"];
+    //   final body = {
+    //     userId: userId,
+    //     fcmToken: fcmToken!,
+    // };
+      final body = {
+        "userId": userId.trim(),
+        "fcmToken": fcmToken?.trim(),
+      };
+      var res = await _apiService.post("auth/update-fcm-token", body,withAuth: false);
+      // await _apiService.updateFcmToken(
+      //   userId: userId,
+      //   fcmToken: fcmToken!,
+      // );
+      print("res-fcm: $res");
+
       final role =response["user"]["role"]??"";
       roleName.value  = response["user"]["role"]??"";
+      final firebaseToken = response["firebaseToken"];
+
+      if (firebaseToken != null && firebaseToken.isNotEmpty) {
+
+        await FirebaseAuth.instance.signInWithCustomToken(firebaseToken);
+        await ensureUserDocument(
+          uid: FirebaseAuth.instance.currentUser!.uid,
+          role: role,
+        );
+
+        print("✅ Firebase logged in with UID: "
+            "${FirebaseAuth.instance.currentUser?.uid}");
+      } else {
+        print("❌ Firebase token missing from API");
+      }
+      print("Firebase UID: ${FirebaseAuth.instance.currentUser?.uid}");
+      print("Mongo User ID: $userId");
 
       final providerInfo = response["providerInfo"]??"";
+      print("providerInfo $providerInfo");
       status = providerInfo["status"]??"";
       onboardingComplete = providerInfo["onboardingComplete"]??false;
 
@@ -91,6 +134,30 @@ class AuthController extends GetxController {
     }
   }
 
+  Future<void> ensureUserDocument({
+    required String uid,
+    required String role,
+  }) async {
+    final docRef =
+    FirebaseFirestore.instance.collection("users").doc(uid);
+
+    final snapshot = await docRef.get();
+
+    if (!snapshot.exists) {
+      await docRef.set({
+        "uid": uid,
+        "role": role,
+        "createdAt": FieldValue.serverTimestamp(),
+        "lastSeen": FieldValue.serverTimestamp(),
+      });
+    } else {
+      await docRef.update({
+        "lastSeen": FieldValue.serverTimestamp(),
+      });
+    }
+  }
+
+
   void navigateToNextScreen(String dashboard, Map<String, dynamic> response){
     List<dynamic> menuList = response["menuList"] as List<dynamic>? ?? [];
 
@@ -108,10 +175,14 @@ class AuthController extends GetxController {
   void navigateToRegistrationScreen(){
     Get.offAllNamed(
       Routes.registrationScreen
-      /*Routes.emailPhoneSignup,*/
     );
   }
 
+  void navigateToResetPasswordScreen(){
+    Get.offAllNamed(
+        Routes.resetPasswordScreen
+    );
+  }
 
 
 
@@ -126,15 +197,15 @@ class AuthController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    user.bindStream(_auth.authStateChanges());
-    ever(user, _handleAuthChanged);
+    // user.bindStream(_auth.authStateChanges());
+    // ever(user, _handleAuthChanged);
   }
 
   void _handleAuthChanged(User? firebaseUser) async {
     if (firebaseUser != null) {
       isLoggedIn.value = true;
       // ✅ Create customer document if not exists
-      await _createCustomerDocument(firebaseUser);
+     // await _createCustomerDocument(firebaseUser);
      // Get.offAllNamed("/home");
     } else {
       isLoggedIn.value = false;
@@ -142,22 +213,23 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> _createCustomerDocument(User firebaseUser) async {
-    final docRef = _firestore.collection('customers').doc(firebaseUser.uid);
-    final docSnapshot = await docRef.get();
-
-    if (!docSnapshot.exists) {
-      // Create a new customer document
-      await docRef.set({
-        "name": firebaseUser.displayName ?? "User",
-        "email": firebaseUser.email ?? "",
-        "createdAt": FieldValue.serverTimestamp(),
-      });
-    }
-  }
+  // Future<void> _createCustomerDocument(User firebaseUser) async {
+  //   final docRef = _firestore.collection('customers').doc(firebaseUser.uid);
+  //   final docSnapshot = await docRef.get();
+  //
+  //   if (!docSnapshot.exists) {
+  //     // Create a new customer document
+  //     await docRef.set({
+  //       "name": firebaseUser.displayName ?? "User",
+  //       "email": firebaseUser.email ?? "",
+  //       "createdAt": FieldValue.serverTimestamp(),
+  //     });
+  //   }
+  // }
 
   Future<void> signInWithGoogle() async {
-    try {
+    Get.snackbar("Information", "We will add this feature soon");
+    /*try {
       final googleUser = await _googleSignIn.signIn();
       if (googleUser == null) return;
 
@@ -170,12 +242,13 @@ class AuthController extends GetxController {
       await _auth.signInWithCredential(credential);
     } catch (e) {
       Get.snackbar("Error", e.toString());
-    }
+    }*/
   }
 
   /// ✅ Facebook Sign-In
   Future<void> signInWithFacebook() async {
-    try {
+    Get.snackbar("Information", "We will add this feature soon");
+    /*try {
       final LoginResult result = await FacebookAuth.instance.login();
 
       if (result.status == LoginStatus.success) {
@@ -192,7 +265,7 @@ class AuthController extends GetxController {
       }
     } catch (e) {
       Get.snackbar("Error", e.toString());
-    }
+    }*/
   }
 
   Future<void> logout() async {

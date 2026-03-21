@@ -55,10 +55,14 @@ class MyBookingDetailsScreen extends StatelessWidget {
               const SizedBox(height: 20),
               _buildInfoCard(controller),
               _buildProviderCard(controller),
-              //_buildCustomerCard(controller),
               if (controller.description.isNotEmpty)
                 _buildDescriptionCard(controller),
+              if (controller.booking['paymentStatus'] == 'advance_paid' &&
+                  controller.booking['status'] != 'cancelled')
+                _buildAdvancePaidCard(context, controller),
               const Divider(height: 30, thickness: 0.6),
+              if(controller.booking['status']=="completed")
+                _buildReviewCard(context, controller),
             ],
           ),
         );
@@ -66,9 +70,208 @@ class MyBookingDetailsScreen extends StatelessWidget {
     );
   }
 
-  // ---------------------------
-  // IMAGE CAROUSEL
-  // ---------------------------
+  Widget _buildReviewCard(
+      BuildContext context, MyBookingDetailsController controller) {
+
+    final rating = 0.obs;
+    final reviewController = TextEditingController();
+    final isSubmitting = false.obs;
+
+    return Obx(() {
+      final reviewStatus = controller.reviewStatus.value;
+
+      return Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey.shade200, width: 1.2),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: reviewStatus == "submitted"
+            ? _buildSubmittedReview(controller)
+            : _buildPendingReview(
+          controller,
+          rating,
+          reviewController,
+          isSubmitting,
+        ),
+      );
+    });
+
+  }
+
+  Widget _buildSubmittedReview(MyBookingDetailsController controller) {
+    if (controller.isReviewLoading.value) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Your Review",
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF3F51B5),
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        /// STARS
+        Row(
+          children: List.generate(5, (index) {
+            return Icon(
+              Icons.star,
+              size: 28,
+              color: controller.submittedRating.value > index
+                  ? Colors.amber
+                  : Colors.grey.shade300,
+            );
+          }),
+        ),
+
+        const SizedBox(height: 12),
+
+        /// REVIEW TEXT
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF7F8FC),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            controller.submittedReview.value.isEmpty
+                ? "No written review"
+                : controller.submittedReview.value,
+            style: const TextStyle(
+              fontSize: 14,
+              height: 1.5,
+              color: Colors.black87,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPendingReview(
+      MyBookingDetailsController controller,
+      RxInt rating,
+      TextEditingController reviewController,
+      RxBool isSubmitting,
+      ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Rate & Review",
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF3F51B5),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          "Your feedback helps us improve our service",
+          style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+        ),
+
+        const SizedBox(height: 16),
+
+        /// STAR SELECTION
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(5, (index) {
+            final starIndex = index + 1;
+            return GestureDetector(
+              onTap: () => rating.value = starIndex,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                child: Icon(
+                  Icons.star,
+                  size: 36,
+                  color: rating.value >= starIndex
+                      ? Colors.amber
+                      : Colors.grey.shade300,
+                ),
+              ),
+            );
+          }),
+        ),
+
+        const SizedBox(height: 16),
+
+        /// REVIEW INPUT
+        TextField(
+          controller: reviewController,
+          maxLines: 4,
+          maxLength: 300,
+          decoration: InputDecoration(
+            hintText: "Write your experience (optional)",
+            filled: true,
+            fillColor: const Color(0xFFF7F8FC),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
+        /// SUBMIT BUTTON
+        SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: rating.value == 0
+                  ? Colors.grey.shade400
+                  : const Color(0xFF3F51B5),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: rating.value == 0 || isSubmitting.value
+                ? null
+                : () async {
+              isSubmitting.value = true;
+              try {
+                await controller.submitReview(
+                  rating: rating.value,
+                  review: reviewController.text.trim(),
+                  bookingId : controller.booking['_id'],
+                );
+              } finally {
+                isSubmitting.value = false;
+              }
+            },
+            child: isSubmitting.value
+                ? const CircularProgressIndicator(color: Colors.white)
+                : const Text(
+              "SUBMIT REVIEW",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildImageCarousel(MyBookingDetailsController controller) {
     final pageController = PageController();
     final currentPage = ValueNotifier<int>(0);
@@ -163,6 +366,9 @@ class MyBookingDetailsScreen extends StatelessWidget {
         start = Colors.redAccent;
         end = Colors.red;
         break;
+      case "completed":
+        start = Colors.blue.shade300;
+        end = Colors.blueAccent;
       default:
         start = Colors.orangeAccent;
         end = Colors.deepOrange;
@@ -256,52 +462,6 @@ class MyBookingDetailsScreen extends StatelessWidget {
     );
   }
 
-/*
-  // ---------------------------
-  // CUSTOMER CARD
-  // ---------------------------
-  Widget _buildCustomerCard(MyBookingDetailsController controller) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200, width: 1.2),
-        boxShadow: [
-          BoxShadow(color: Colors.black12.withOpacity(0.05), blurRadius: 4, offset: const Offset(2, 3)),
-        ],
-      ),
-      padding: const EdgeInsets.all(16),
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Row(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: const LinearGradient(colors: [Color(0xFF3F51B5), Color(0xFF5A65E0)]),
-            ),
-            padding: const EdgeInsets.all(10),
-            child: const Icon(Icons.person, color: Colors.white, size: 26),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(controller.userName,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                    overflow: TextOverflow.ellipsis),
-                Text("${controller.userEmail} | ${controller.userPhone}",
-                    style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
-                    overflow: TextOverflow.ellipsis),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-*/
-
   // ---------------------------
   // DESCRIPTION CARD
   // ---------------------------
@@ -358,4 +518,175 @@ class MyBookingDetailsScreen extends StatelessWidget {
       ],
     );
   }
+
+  // ---------------------------
+  // ADVANCE PAID CARD
+  // ---------------------------
+  Widget _buildAdvancePaidCard(BuildContext context, MyBookingDetailsController controller) {
+    final remaining = controller.booking['remainingAmount'] ?? 0;
+    final isProcessing = false.obs;
+
+    return Obx(() => _card(
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Payment Details",
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF3F51B5)),
+          ),
+          const SizedBox(height: 12),
+          _row("Total", "₹${controller.booking['totalAmount']}"),
+          _row("Advance Paid",
+              "₹${controller.booking['advanceAmount']}"),
+          const Divider(),
+          _row(
+            "Remaining",
+            "₹$remaining",
+            valueColor: Colors.redAccent,
+            valueSize: 18,
+          ),
+          const SizedBox(height: 16),
+
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF3F51B5),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+              onPressed: remaining > 0 && !isProcessing.value
+                  ? () async {
+                try {
+                  isProcessing.value = true;
+                  await controller.startPayment();
+
+                  // ✅ SHOW SUCCESS UI FROM SCREEN
+                  _showPaymentSuccessSheet(
+                    context: context,
+                    amount: remaining,
+                    bookingId: controller.booking['_id'],
+                  );
+                } catch (e) {
+                  Get.snackbar("Payment Failed", e.toString());
+                } finally {
+                  isProcessing.value = false;
+                }
+              }
+                  : null,
+              child: isProcessing.value
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : const Text(
+                "PAY REMAINING AMOUNT",
+                style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ));
+  }
+
+  // ---------------- SUCCESS BOTTOM SHEET ----------------
+  void _showPaymentSuccessSheet({
+    required BuildContext context,
+    required int amount,
+    required String bookingId,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      isDismissible: false,
+      enableDrag: false,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) {
+        return Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.check_circle,
+                  color: Colors.green, size: 72),
+              const SizedBox(height: 12),
+              const Text(
+                "Payment Successful",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Text("₹$amount paid successfully",
+                  style: TextStyle(color: Colors.grey.shade700)),
+              const SizedBox(height: 12),
+              _row("Booking ID", bookingId),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF3F51B5),
+                  ),
+                  child: const Text("DONE",style: TextStyle(color: Colors.white),),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // ---------------- COMMON WIDGETS ----------------
+  Widget _row(String title, String value,
+      {Color? valueColor, double valueSize = 14}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(title, style: TextStyle(color: Colors.grey.shade700)),
+          Text(
+            value,
+            style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: valueSize,
+                color: valueColor),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _card(Widget child) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
+          BoxShadow(
+              color: Colors.black12, blurRadius: 6, offset: Offset(0, 3))
+        ],
+      ),
+      child: child,
+    );
+  }
+
 }
+/*Widget _buildPaymentRow(String title, String value) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 4),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(title, style: TextStyle(fontSize: 14, color: Colors.grey.shade700)),
+        Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+      ],
+    ),
+  );
+}*/
