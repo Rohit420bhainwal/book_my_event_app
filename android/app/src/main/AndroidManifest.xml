@@ -8,11 +8,14 @@
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission
+        android:name="com.google.android.gms.permission.AD_ID"
+        tools:node="remove"/>
 
     <application
         android:label="bookmyevent"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/ic_app_launcher"
         android:enableOnBackInvokedCallback="true">
 
         <!-- 🔥 Firebase Crashlytics -->
