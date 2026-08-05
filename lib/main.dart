@@ -6,7 +6,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_stripe/flutter_stripe.dart';
+//import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -67,10 +67,10 @@ void main() async {
   //await FCMService.init();
  // runApp(BookMyEventApp());
 
-   Stripe.publishableKey = "pk_test_51Sh33oCtpKweHSzBMdAE7de66uGJ4oGD1PwRHWNmMqzJ9ANZlvfwhsu7fTPs7g2FegRIR134GPaIVgegMkOcqJQw00wgzzAeTN";
+  // Stripe.publishableKey = "pk_test_51Sh33oCtpKweHSzBMdAE7de66uGJ4oGD1PwRHWNmMqzJ9ANZlvfwhsu7fTPs7g2FegRIR134GPaIVgegMkOcqJQw00wgzzAeTN";
   //
   print("HERE!");
-   await Stripe.instance.applySettings();
+  // await Stripe.instance.applySettings();
 
   runApp(const BookMyEventApp());
 }

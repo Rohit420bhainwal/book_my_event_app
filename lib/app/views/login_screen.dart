@@ -174,41 +174,41 @@ class LoginScreen extends StatelessWidget {
                   const SizedBox(height: 24),
 
                   // 🔹 OR Divider
-                  Row(
-                    children: [
-                      const Expanded(child: Divider(thickness: 1)),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: Text(
-                          "OR",
-                          style: TextStyle(
-                            color: theme.colorScheme.onSurface.withOpacity(0.6),
-                          ),
-                        ),
-                      ),
-                      const Expanded(child: Divider(thickness: 1)),
-                    ],
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // 🔹 Google & Facebook Login Buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _socialIconButton(
-                        icon: FontAwesomeIcons.google,
-                        color: Colors.redAccent,
-                        onTap: () => authController.signInWithGoogle(),
-                      ),
-                      const SizedBox(width: 24),
-                      _socialIconButton(
-                        icon: FontAwesomeIcons.facebookF,
-                        color: Colors.blueAccent,
-                        onTap: () => authController.signInWithFacebook(),
-                      ),
-                    ],
-                  ),
+                  // Row(
+                  //   children: [
+                  //     const Expanded(child: Divider(thickness: 1)),
+                  //     Padding(
+                  //       padding: const EdgeInsets.symmetric(horizontal: 8),
+                  //       child: Text(
+                  //         "OR",
+                  //         style: TextStyle(
+                  //           color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  //         ),
+                  //       ),
+                  //     ),
+                  //     const Expanded(child: Divider(thickness: 1)),
+                  //   ],
+                  // ),
+                  //
+                  // const SizedBox(height: 20),
+                  //
+                  // // 🔹 Google & Facebook Login Buttons
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.center,
+                  //   children: [
+                  //     _socialIconButton(
+                  //       icon: FontAwesomeIcons.google,
+                  //       color: Colors.redAccent,
+                  //       onTap: () => authController.signInWithGoogle(),
+                  //     ),
+                  //     const SizedBox(width: 24),
+                  //     _socialIconButton(
+                  //       icon: FontAwesomeIcons.facebookF,
+                  //       color: Colors.blueAccent,
+                  //       onTap: () => authController.signInWithFacebook(),
+                  //     ),
+                  //   ],
+                  // ),
                 ],
               );
             }),
@@ -220,7 +220,7 @@ class LoginScreen extends StatelessWidget {
 
   // 🔹 Social Icon Button Widget
   Widget _socialIconButton({
-    required IconData icon,
+    required FaIconData icon,
     required Color color,
     required VoidCallback onTap,
   }) {
@@ -234,7 +234,11 @@ class LoginScreen extends StatelessWidget {
           shape: BoxShape.circle,
           border: Border.all(color: color.withOpacity(0.5), width: 2),
         ),
-        child: Icon(icon, color: color, size: 26),
+        child: FaIcon(
+          icon,
+          color: color,
+          size: 26,
+        ),
       ),
     );
   }

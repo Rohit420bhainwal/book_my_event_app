@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_stripe/flutter_stripe.dart';
+//import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
 import '../../../app/services/api_service.dart';
 import '../../../utils/date_utils.dart';
@@ -90,15 +90,15 @@ class MyBookingDetailsController extends GetxController {
       final clientSecret = response['data']['clientSecret'];
       final paymentIntentId = response['data']['paymentIntentId'];
 
-      await Stripe.instance.initPaymentSheet(
-        paymentSheetParameters: SetupPaymentSheetParameters(
-          paymentIntentClientSecret: clientSecret,
-          merchantDisplayName: booking['provider']['businessName'],
-          style: ThemeMode.light,
-        ),
-      );
-
-      await Stripe.instance.presentPaymentSheet();
+      // await Stripe.instance.initPaymentSheet(
+      //   paymentSheetParameters: SetupPaymentSheetParameters(
+      //     paymentIntentClientSecret: clientSecret,
+      //     merchantDisplayName: booking['provider']['businessName'],
+      //     style: ThemeMode.light,
+      //   ),
+      // );
+      //
+      // await Stripe.instance.presentPaymentSheet();
       await saveFinalBooking(paymentIntentId);
     } catch (e) {
       print("Stripe Payment Error: $e");

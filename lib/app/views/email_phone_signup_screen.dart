@@ -156,12 +156,12 @@ class _EmailPhoneSignupScreenState extends State<EmailPhoneSignupScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 IconButton(
-                  icon: const Icon(FontAwesomeIcons.google, color: Colors.red, size: 30),
+                  icon: const FaIcon(FontAwesomeIcons.google, color: Colors.red, size: 30),
                   onPressed: _googleSignIn,
                 ),
                 const SizedBox(width: 30),
                 IconButton(
-                  icon: const Icon(FontAwesomeIcons.facebook, color: Colors.blue, size: 30),
+                  icon: const FaIcon(FontAwesomeIcons.facebook, color: Colors.blue, size: 30),
                   onPressed: _facebookSignIn,
                 ),
               ],

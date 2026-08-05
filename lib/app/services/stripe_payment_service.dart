@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:flutter_stripe/flutter_stripe.dart';
+//import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:http/http.dart' as http;
 import 'dart:ui' as ui;
 
@@ -44,14 +44,14 @@ class StripePaymentService {
       print("clientSecret: $clientSecret");
 
       // 2️⃣ Initialize payment sheet
-      await Stripe.instance.initPaymentSheet(
-        paymentSheetParameters: SetupPaymentSheetParameters(
-          paymentIntentClientSecret: clientSecret,
-          merchantDisplayName: 'Demo App',
-        ),
-      );
+      // await Stripe.instance.initPaymentSheet(
+      //   paymentSheetParameters: SetupPaymentSheetParameters(
+      //     paymentIntentClientSecret: clientSecret,
+      //     merchantDisplayName: 'Demo App',
+      //   ),
+      // );
     }
     // 3️⃣ Present payment sheet
-    await Stripe.instance.presentPaymentSheet();
+  //  await Stripe.instance.presentPaymentSheet();
   }
 }

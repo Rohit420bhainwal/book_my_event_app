@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_stripe/flutter_stripe.dart';
+//import 'package:flutter_stripe/flutter_stripe.dart';
 import '../../../controllers/venues/booking_controller.dart';
 
 // 🔹 Payment choice enum (same as controller)
@@ -68,16 +68,16 @@ class _PaymentScreenState extends State<PaymentScreen> {
       final paymentIntentId = response['data']['paymentIntentId'];
 
       // 2️⃣ Init Stripe payment sheet
-      await Stripe.instance.initPaymentSheet(
-        paymentSheetParameters: SetupPaymentSheetParameters(
-          paymentIntentClientSecret: clientSecret,
-          merchantDisplayName: widget.venue['businessName'],
-          style: ThemeMode.light,
-        ),
-      );
+      // await Stripe.instance.initPaymentSheet(
+      //   paymentSheetParameters: SetupPaymentSheetParameters(
+      //     paymentIntentClientSecret: clientSecret,
+      //     merchantDisplayName: widget.venue['businessName'],
+      //     style: ThemeMode.light,
+      //   ),
+      // );
 
       // 3️⃣ Present payment sheet
-      await Stripe.instance.presentPaymentSheet();
+    //  await Stripe.instance.presentPaymentSheet();
 
       paymentStatus.value = 1;
 /*
