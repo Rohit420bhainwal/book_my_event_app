@@ -1,4 +1,4 @@
-package com.bookmyevent.app
+package com.bookmyevent.booking
 
 //import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.android.FlutterFragmentActivity

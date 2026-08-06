@@ -19,7 +19,8 @@ if (keystorePropertiesFile.exists()) {
 
 android {
    // namespace = "com.bookmyevent.app.bookmyevent"
-    namespace = "com.bookmyevent.app"
+   // namespace = "com.bookmyevent.app"
+    namespace = "com.bookmyevent.booking"
     compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
@@ -35,7 +36,8 @@ android {
 
     defaultConfig {
       //  applicationId = "com.bookmyevent.app.bookmyevent"
-        applicationId = "com.bookmyevent.app"
+       // applicationId = "com.bookmyevent.app"
+        applicationId = "com.bookmyevent.booking"
         minSdk = flutter.minSdkVersion
         targetSdk = 36
         versionCode = flutter.versionCode

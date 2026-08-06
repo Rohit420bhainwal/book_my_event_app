@@ -74,6 +74,35 @@
     },
     {
       "client_info": {
+        "mobilesdk_app_id": "1:354978036422:android:9a2c37ea773c17848ef5c7",
+        "android_client_info": {
+          "package_name": "com.bookmyevent.booking"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "354978036422-04fld3kqb27herd79e67lpo0en8p2m0t.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCMkgPHghq3E8t8sAbYl---NLzEYgJltJY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "354978036422-04fld3kqb27herd79e67lpo0en8p2m0t.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:354978036422:android:d78ddca45a6a83d98ef5c7",
         "android_client_info": {
           "package_name": "com.example.bookmyevent_admin"
